@@ -1,0 +1,14 @@
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+    android:shape="rectangle">
+
+    <solid android:color="?attr/backgroundColorEditTagView" />
+
+    <padding
+        android:left="2dp"
+        android:right="8dp"
+        android:top="0dp"
+        android:bottom="0dp" />
+
+    <corners android:radius="10dp" />
+
+</shape>

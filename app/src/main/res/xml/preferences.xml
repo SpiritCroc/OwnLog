@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Copyright (C) 2017 SpiritCroc
+    Email: spiritcroc@gmail.com
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+-->
+
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+    android:title="@string/title_settings">
+
+    <Preference
+        android:key="pref_password"
+        android:title="@string/pref_password_title" />
+
+    <ListPreference
+        android:key="default_filter"
+        android:title="@string/pref_default_filter_title"
+        android:defaultValue="-1" />
+
+    <PreferenceCategory
+        android:title="@string/pref_category_ui">
+
+        <ListPreference
+            android:key="pref_theme"
+            android:title="@string/pref_theme_title"
+            android:entries="@array/pref_theme_entries"
+            android:entryValues="@array/pref_theme_values"
+            android:defaultValue="0" />
+
+        <PreferenceScreen
+            android:key="pref_date_formats"
+            android:title="@string/pref_date_formats_title"
+            android:summary="@string/pref_date_formats_summary"
+            android:fragment="de.spiritcroc.ownlog.ui.settings.DateFormatSettingsFragment" />
+
+    </PreferenceCategory>
+
+    <!-- EASTEREGG -->
+    <Preference
+        android:key="easteregg_off" />
+    <CheckBoxPreference
+        android:key="easteregg"
+        android:title="@string/easteregg" />
+
+</PreferenceScreen>

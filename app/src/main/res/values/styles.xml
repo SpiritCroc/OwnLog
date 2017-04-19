@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Copyright (C) 2017 SpiritCroc
+    Email: spiritcroc@gmail.com
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+-->
+
+<resources>
+
+    <!-- Log list -->
+    <style name="LogListText.Header" parent="">
+        <item name="android:textSize">@dimen/text_size_small</item>
+        <item name="android:textColor">?attr/textColorListHeader</item>
+    </style>
+
+    <style name="LogListText.Date2" parent="">
+        <item name="android:textSize">@dimen/text_size_small</item>
+        <item name="android:textColor">?attr/textColorListDate2</item>
+    </style>
+
+    <style name="LogListText.Date3" parent="">
+        <item name="android:textSize">@dimen/text_size_small</item>
+        <item name="android:textColor">?attr/textColorListDate3</item>
+    </style>
+
+    <style name="LogListText.Title" parent="">
+        <item name="android:textSize">@dimen/text_size_medium</item>
+        <item name="android:textColor">?attr/textColorListTitle</item>
+    </style>
+
+    <style name="LogListText.Tag" parent="">
+        <item name="android:textSize">@dimen/text_size_small</item>
+        <item name="android:textColor">?attr/textColorListTag</item>
+    </style>
+
+    <!-- Edit log item -->
+    <style name="EditDateTimeButton" parent="Base.Widget.AppCompat.Button.Borderless">
+        <item name="android:minWidth">24dp</item>
+        <item name="android:minHeight">24dp</item>
+    </style>
+
+    <style name="AddTagButton" parent="Base.Widget.AppCompat.Button.Borderless">
+        <item name="android:minWidth">18dp</item>
+        <item name="android:minHeight">18dp</item>
+    </style>
+
+    <!-- Show log item -->
+    <style name="LogItemShowText.Title" parent="">
+        <item name="android:textSize">@dimen/text_size_big</item>
+        <item name="android:textStyle">bold</item>
+    </style>
+
+    <style name="LogItemShowText.Content" parent="">
+        <item name="android:textSize">@dimen/text_size_medium</item>
+        <item name="android:paddingTop">16dp</item>
+        <item name="android:paddingBottom">16dp</item>
+    </style>
+
+    <style name="LogItemShowText.Tags" parent="">
+        <item name="android:textSize">@dimen/text_size_small</item>
+    </style>
+
+    <!-- Edit tags -->
+    <style name="EditLogTags.TagName" parent="">
+        <item name="android:textSize">@dimen/text_size_medium</item>
+    </style>
+
+    <style name="EditLogTags.EditTagButton" parent="Base.Widget.AppCompat.Button.Borderless">
+        <item name="android:minWidth">18dp</item>
+        <item name="android:minHeight">18dp</item>
+    </style>
+
+    <!-- SimpleDateFormatPreference -->
+    <style name="SimpleDateFormatPreference.AddButton" parent="Base.Widget.AppCompat.Button.Borderless">
+        <item name="android:minWidth">24dp</item>
+        <item name="android:minHeight">24dp</item>
+    </style>
+    <style name="SimpleDateFormatPreference.ClearButton" parent="Base.Widget.AppCompat.Button.Borderless">
+        <item name="android:minWidth">24dp</item>
+        <item name="android:minHeight">24dp</item>
+    </style>
+</resources>

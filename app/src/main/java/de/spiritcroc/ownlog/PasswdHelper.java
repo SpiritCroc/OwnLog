@@ -1,0 +1,129 @@
+/*
+ * Copyright (C) 2017 SpiritCroc
+ * Email: spiritcroc@gmail.com
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+package de.spiritcroc.ownlog;
+
+import android.app.Activity;
+import android.content.Context;
+import android.util.Log;
+
+import net.sqlcipher.database.SQLiteDatabase;
+import net.sqlcipher.database.SQLiteException;
+
+import java.io.File;
+
+import de.spiritcroc.ownlog.data.DbHelper;
+import de.spiritcroc.ownlog.ui.fragment.RequestPasswordDialog;
+
+public class PasswdHelper {
+
+    private static final String TAG = PasswdHelper.class.getSimpleName();
+
+    private static String passwd = "";
+
+    public static boolean getWritableDatabase(Activity activity, RequestDbListener listener,
+                                              int requestId) {
+        return getWritableDatabase(activity, listener, requestId, true);
+    }
+
+    private static boolean getWritableDatabase(Activity activity, RequestDbListener listener,
+                                           int requestId, boolean newRequest) {
+        DbHelper dbHelper = new DbHelper(activity);
+        SQLiteDatabase db = null;
+        try {
+            db = dbHelper.getWritableDatabase(passwd);
+        } catch (SQLiteException e) {
+            e.printStackTrace();
+        }
+        if (db != null) {
+            listener.receiveWritableDatabase(db, requestId);
+            return true;
+        } else if (newRequest) {
+            new RequestPasswordDialog().init(listener, requestId)
+                    .show(activity.getFragmentManager(), "RequestPasswordDialog");
+        }
+        return false;
+    }
+
+    public static boolean getWritableDatabase(Activity activity, RequestDbListener listener,
+                                           int requestId, String newPasswd, boolean newRequest) {
+        passwd = newPasswd;
+        return getWritableDatabase(activity, listener, requestId, newRequest);
+    }
+
+    public static boolean isPasswordUnset() {
+        return "".equals(passwd);
+    }
+
+    public static boolean doesPasswordMatch(String passwd) {
+        return PasswdHelper.passwd.equals(passwd);
+    }
+
+    public static void setPasswd(Context context, String oldPasswd, String newPasswd) {
+        if (oldPasswd.equals(newPasswd)) {
+            Log.w(TAG, "setPasswd: ignoring call with identical old and new password");
+            return;
+        }
+        if (!passwd.equals(oldPasswd)) {
+            Log.e(TAG, "setPasswd: wrong old password");
+            return;
+        }
+        DbHelper dbHelper = new DbHelper(context);
+        SQLiteDatabase db = null;
+        try {
+            db = dbHelper.getWritableDatabase(passwd);
+        } catch (SQLiteException e) {
+            e.printStackTrace();
+        }
+        if (db == null) {
+            Log.e(TAG, "setPasswd: old password denied by database");
+            return;
+        }
+
+        // Delete backup-ed db if it exists, since it won't have the same password as this one,
+        // which would lead either to problems when trying to restore; or possibly even a
+        // security concern
+        DbHelper.deleteBackup(context);
+
+        if ("".equals(oldPasswd) || "".equals(newPasswd)) {
+            // Add/remove decryption: simple changePassword() call is not enough,
+            // migrate to a new db instead
+            File dbFile = context.getDatabasePath(DbHelper.NAME);
+            File dbCopyFile = context.getDatabasePath(DbHelper.NAME_COPY);
+            dbCopyFile.delete();
+            SQLiteDatabase dbCopy = SQLiteDatabase.openOrCreateDatabase(dbCopyFile, newPasswd, null);
+            dbCopy.setVersion(DbHelper.VERSION);
+            db.rawExecSQL("PRAGMA key = \'" + oldPasswd + "\';");
+            db.rawExecSQL("ATTACH DATABASE \'" + dbCopyFile +
+                    "\' AS encrypted KEY \'" + newPasswd + "\';");
+            db.rawExecSQL("SELECT sqlcipher_export(\'encrypted\');");
+            db.rawExecSQL("DETACH DATABASE encrypted;");
+            dbFile.delete();
+            dbCopyFile.renameTo(dbFile);
+        } else {
+            db.changePassword(newPasswd);
+        }
+        db.close();
+        dbHelper.close();
+        passwd = newPasswd;
+    }
+
+    public interface RequestDbListener {
+        void receiveWritableDatabase(SQLiteDatabase db, int requestId);
+    }
+}
