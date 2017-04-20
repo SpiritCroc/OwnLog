@@ -80,7 +80,7 @@
     <string name="edit_log_item_title">@string/title</string>
     <string name="edit_log_item_content">@string/content</string>
     <string name="edit_log_item_date">@string/date</string>
-    <string name="edit_log_tags">Tags: </string>
+    <string name="edit_log_tags">Tags:</string>
     <string name="edit_log_tags_add">Add tag</string>
     <string name="edit_log_tags_add_new">New tag&#8230;</string>
 
