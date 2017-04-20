@@ -103,8 +103,6 @@ public class LogFragment extends BaseFragment implements PasswdHelper.RequestDbL
     private SearchView mSearchView;
     private String mLogSearch;
 
-    private IntentFilter mBroadcastIntentFilter = new IntentFilter(Constants.EVENT_LOG_UPDATE);
-
     private BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
@@ -116,6 +114,10 @@ public class LogFragment extends BaseFragment implements PasswdHelper.RequestDbL
                     mShouldUpdateFilters = true;
                     mNextFilterId = intent.getLongExtra(Constants.EXTRA_LOG_FILTER_ITEM_ID, -2);
                 }
+                finishActionMode();
+                loadContent(true);
+            } else if (Constants.EVENT_TAG_UPDATE.equals(intent.getAction())) {
+                mShouldUpdateFilters = true;
                 finishActionMode();
                 loadContent(true);
             }
@@ -184,8 +186,12 @@ public class LogFragment extends BaseFragment implements PasswdHelper.RequestDbL
 
         setHasOptionsMenu(true);
         loadContent(true);
+
+        IntentFilter broadcastIntentFilter = new IntentFilter();
+        broadcastIntentFilter.addAction(Constants.EVENT_LOG_UPDATE);
+        broadcastIntentFilter.addAction(Constants.EVENT_TAG_UPDATE);
         LocalBroadcastManager.getInstance(getActivity())
-                .registerReceiver(mBroadcastReceiver, mBroadcastIntentFilter);
+                .registerReceiver(mBroadcastReceiver, broadcastIntentFilter);
     }
 
     @Override

@@ -271,10 +271,6 @@ public class TagItemEditFragment extends DialogFragment implements PasswdHelper.
                             .putExtra(Constants.EXTRA_TAG_ITEM, result)
                             .putExtra(Constants.EXTRA_TAG_ACTION, Constants.TAG_ACTION_EDIT)
             );
-            // Notify about possibly updated list
-            LocalBroadcastManager.getInstance(getActivity()).sendBroadcast(
-                    new Intent(Constants.EVENT_LOG_UPDATE)
-            );
         }
     }
 
@@ -312,10 +308,6 @@ public class TagItemEditFragment extends DialogFragment implements PasswdHelper.
                 new Intent(Constants.EVENT_TAG_UPDATE)
                         .putExtra(Constants.EXTRA_TAG_ITEM, new TagItem(mEditItemId))
                         .putExtra(Constants.EXTRA_TAG_ACTION, Constants.TAG_ACTION_DELETE)
-        );
-        // Notify about updated list
-        LocalBroadcastManager.getInstance(getActivity()).sendBroadcast(
-                new Intent(Constants.EVENT_LOG_UPDATE)
         );
         Toast.makeText(getActivity(),
                 // Should be impossible to create/edit a tag with empty name, so we can assume

@@ -48,8 +48,7 @@ public class Constants {
     public static final String EVENT_LOG_UPDATE = "de.spiritcroc.ownlog.event.log_update";
 
     /**
-     * Event which means a tag has been added/edited/removed, so fragments editing items with tag
-     * lists should update
+     * Event which means a tag has been added/edited/removed.
      */
     public static final String EVENT_TAG_UPDATE = "de.spiritcroc.ownlog.event.tag_update";
 }
