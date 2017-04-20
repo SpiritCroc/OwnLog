@@ -1,0 +1,220 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Copyright (C) 2017 SpiritCroc
+    Email: spiritcroc@gmail.com
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+-->
+
+<resources>
+    <string name="app_name">OwnLog</string>
+
+    <string name="title_settings">@string/settings</string>
+    <string name="title_about">@string/about</string>
+    <string name="title_log_item_add">Neu: %s</string>
+    <string name="title_log_item_edit">Bearbeiten: %s</string>
+    <string name="title_log_item_show">%s</string>
+    <string name="title_tag_item_add">Neues Stichwort</string>
+    <string name="title_tag_item_edit">Stichwort bearbeiten</string>
+    <string name="title_log_filter_add">Neuer Filter</string>
+    <string name="title_log_filter_edit">Filter bearbeiten</string>
+
+    <string name="action_add">@string/add</string>
+    <string name="action_delete">@string/delete</string>
+    <string name="action_edit">@string/edit</string>
+    <string name="action_save">@string/save</string>
+    <string name="action_search">@string/search</string>
+    <string name="action_select_all">@string/select_all</string>
+    <string name="action_tag">@string/tags</string>
+
+    <string name="drawer_filters">@string/filters</string>
+    <string name="drawer_add_filter">Neuer Filter&#8230;</string>
+    <string name="drawer_more">@string/more</string>
+    <string name="drawer_settings">@string/settings</string>
+    <string name="drawer_about">@string/about</string>
+
+    <plurals name="action_mode_selected_items">
+        <item quantity="one">%d ausgewählt</item>
+        <item quantity="other">%d ausgewählt</item>
+    </plurals>
+
+    <string name="dialog_add">@string/add</string>
+    <string name="dialog_cancel">@string/cancel</string>
+    <string name="dialog_ok">@string/ok</string>
+    <string name="dialog_request_password">Passwort benötigt</string>
+    <string name="dialog_set_password">Passwort setzen</string>
+    <string name="dialog_change_password">Passwort ändern</string>
+    <string name="dialog_remove_password">Passwort löschen?</string>
+    <string name="dialog_unsaved_changes">Ungespeicherte Änderungen vorhanden</string>
+    <string name="dialog_save_changes">@string/save</string>
+    <string name="dialog_discard_changes">@string/discard</string>
+    <string name="dialog_delete_log_entry">Eintrag löschen?</string>
+    <string name="dialog_delete_log_entry_title">Eintrag \"%s\" löschen?</string>
+    <plurals name="dialog_delete_log_entries">
+        <!-- quantity one already handled separately (see dialog_delete_log_entry(_title)) -->
+        <item quantity="one">%d Eintrag löschen?</item>
+        <item quantity="other">%d Einträge löschen?</item>
+    </plurals>
+    <string name="dialog_delete">@string/delete</string>
+    <string name="dialog_delete_tag_entry_title">Stichwort \"%s\" löschen?</string>
+    <string name="dialog_delete_tag_entry_message">WARNUNG: Falls dieses Stichwort gelöscht wird, wird es unwiderruflich von allen Einträgen entfernt. Fortfahren?</string>
+    <string name="dialog_deleted_tag_entry_toast_title">Stichwort \"%s\" gelöscht</string>
+    <string name="dialog_select_tags">Stichwörter auswählen</string>
+    <string name="dialog_delete_log_filter_entry_title">Filter \"%s\" löschen?</string>
+    <string name="dialog_deleted_log_filter_entry_toast_title">Filter \"%s\" gelöscht</string>
+
+    <string name="edit_password_hint">Passwort eingeben</string>
+    <string name="edit_wrong_password">Falsches Passwort</string>
+
+    <string name="edit_old_password">Altes Passwort</string>
+    <string name="edit_new_password">Neues Passwort</string>
+    <string name="edit_confirm_password">Neues Passwort bestätigen</string>
+    <string name="edit_wrong_confirm_password">Passwörter stimmen nicht überein</string>
+
+    <string name="edit_log_item_title">@string/title</string>
+    <string name="edit_log_item_content">@string/content</string>
+    <string name="edit_log_item_date">@string/date</string>
+    <string name="edit_log_tags">Stichwörter:</string>
+    <string name="edit_log_tags_add">Stichwort hinzufügen</string>
+    <string name="edit_log_tags_add_new">Neues Stichwort&#8230;</string>
+
+    <string name="edit_tag_item_name">@string/name</string>
+    <string name="edit_tag_item_description">Beschreibung</string>
+    <string name="edit_tag">@string/edit</string>
+
+    <string name="error_tag_with_name_exists">Identisches Stichwort existiert bereits</string>
+    <string name="error_should_not_be_empty">Darf nicht leer sein</string>
+
+    <string name="edit_log_filter_name">@string/name</string>
+    <string name="edit_log_filter_sort_order">"Sortierreihenfolge: "</string>
+    <string name="edit_log_filter_tags_strict_no_tags">"Zeige nur Einträge ohne Stichwort: "</string>
+    <string name="edit_log_filter_tags_strict_tags">"Zeige nur Einträge mit allen der ausgewählten Stichworte: "</string>
+    <string name="log_filter_default_name">Alles anzeigen</string>
+    <string name="log_filter_default_new_name">Neuer Filter</string>
+
+    <string name="edit_log_filter_sort_order_date_descending">Neue Einträge zuerst</string>
+    <string name="edit_log_filter_sort_order_date_ascending">Alte Einträge zuerst</string>
+    <string name="edit_log_filter_sort_order_date_end_descending">Zuletzt bearbeitete Einträge zuerst</string>
+
+    <string name="log_list_tag_list_separator">@string/string_list_separator</string>
+
+
+    <!-- Date formats defaults (SimpleDateFormat) -->
+    <string name="date_format_overview_1">MMM y</string>
+    <string name="date_format_overview_2">"dd. "</string>
+    <string name="date_format_overview_3">E H:mm</string>
+    <string name="date_format_full_date_time">dd.MM.y H:mm</string>
+    <string name="date_format_date_for_title">dd. MMM (y)</string>
+
+
+    <!-- Settings -->
+    <string name="pref_password_title">Passwort</string>
+    <string name="pref_password_summary_set">Passwort für Zugang einrichten</string>
+    <string name="pref_password_summary_change">Passwort ändern</string>
+
+    <string name="pref_category_ui">Benutzeroberfläche</string>
+
+    <string name="pref_theme_title">Design</string>
+    <string name="pref_theme_light">Hell</string>
+    <string name="pref_theme_dark">Dunkel</string>
+
+    <string name="pref_default_filter_title">Bevorzugter Filter</string>
+
+    <string name="pref_date_formats_title">Datumsformat</string>
+    <string name="pref_date_formats_summary">Formatierung für Datum und Zeit ändern</string>
+
+    <string name="pref_date_formats_explanation_title">Wie es funktioniert</string>
+    <string name="pref_date_formats_explanation_summary">Das Datumsformat wird durch ein Schema festgelegt, welches von Javas SimpleDateFormat interpretiert wird. Es kann im Folgenden aus einigen Vorschlägen zusammengesetzt, oder auch komplett selbst erstellt werden. Zur Verwendung der Voreinstellung Feld freilassen!</string>
+
+    <string name="pref_date_format_overview_1_title">Überschrift der Listenbereiche</string>
+    <string name="pref_date_format_overview_2_title">Eintrag (hervorgehobener Teil)</string>
+    <string name="pref_date_format_overview_3_title">Eintrag (ausführlicher Teil)</string>
+    <string name="pref_date_format_full_date_time_title">Titel (lang)</string>
+    <string name="pref_date_format_date_for_title_title">Titel (kurz)</string>
+
+
+    <!-- About screen -->
+    <string name="about_licence_title">Lizenz</string>
+    <string name="about_licence_summary">Diese App wird unter der GNU GENERAL PUBLIC LICENSE, Version 3 zur Verfügung gestellt.</string>
+
+    <string name="about_source_code_title">Quellcode</string>
+    <string name="about_source_code_summary">https://github.com/SpiritCroc/OwnLog</string>
+
+    <string name="about_category_third_party">Drittanbieter</string>
+
+    <string name="about_third_party_aosp_title">AOSP</string>
+    <string name="about_third_party_aosp_summary">Copyright &#169; The Android Open Source Project\n\nLicensed under the Apache License, Version 2.0.</string>
+
+    <string name="about_third_party_flexbox_title">FlexboxLayout</string>
+    <string name="about_third_party_flexbox_summary">Copyright &#169; Google Inc.\n\nLicensed under the Apache License, Version 2.0.</string>
+
+    <string name="about_third_party_indeterminate_checkbox_title">indeterminate-checkbox</string>
+    <string name="about_third_party_indeterminate_checkbox_summary">Copyright &#169; Svetlozar Kostadinov (sevar83)\n\nLicensed under the Apache License, Version 2.0.</string>
+
+    <string name="about_third_party_material_design_icons_title">Material design icons</string>
+    <string name="about_third_party_material_design_icons_summary">Copyright &#169; Google Inc.\n\nLicensed under the Apache License, Version 2.0.</string>
+
+    <string name="about_third_party_material_drawer_title">MaterialDrawer</string>
+    <string name="about_third_party_material_drawer_summary">Copyright &#169; Mike Penz\n\nLicensed under the Apache License, Version 2.0.</string>
+
+    <string name="about_third_party_sqlcipher_title">SQLCipher for Android Application Integration</string>
+    <string name="about_third_party_sqlcipher_summary">Copyright &#169; 2010 Zetetic LLC\n\nThe SQLCipher code itself is licensed under a BSD-style license from Zetetic LLC. Finally, the original SQLite code itself is in the public domain.</string>
+
+    <string name="about_third_party_support_title">Support libraries</string>
+    <string name="about_third_party_support_summary">Copyright &#169; The Android Open Source Project\n\nLicensed under the Apache License, Version 2.0.</string>
+
+    <!-- SimpleDateFormatPreference -->
+    <string name="sdfp_add">Hinzufügen</string>
+    <string name="sdfp_clear">Löschen</string>
+    <string name="sdfp_preview">Vorschau: %s</string>
+    <string name="sdfp_pattern_separator">" "</string>
+    <string name="sdfp_pattern_y">Jahr</string>
+    <string name="sdfp_pattern_yy">Jahr (2 Stellen)</string>
+    <string name="sdfp_pattern_M">Monat</string>
+    <string name="sdfp_pattern_MM">Monat (2 Stellen)</string>
+    <string name="sdfp_pattern_MMM">Monat (abgekürzt)</string>
+    <string name="sdfp_pattern_MMMM">Monat (ganzer Name)</string>
+    <string name="sdfp_pattern_d">Tag des Monats</string>
+    <string name="sdfp_pattern_dd">Tag des Monats (2 Stellen)</string>
+    <string name="sdfp_pattern_h">Stunden bis 12</string>
+    <string name="sdfp_pattern_hh">Stunden bis 12 (2 Stellen)</string>
+    <string name="sdfp_pattern_a">Vormittag/Nachmittag</string>
+    <string name="sdfp_pattern_H">Stunden bis 24</string>
+    <string name="sdfp_pattern_HH">Stunden bis 24 (2 Stellen)</string>
+    <string name="sdfp_pattern_mm">Minuten</string>
+    <string name="sdfp_summary_invalid_pattern">Ungültiges Schema</string>
+    <string name="sdfp_summary_default">%s (Voreinstellung)</string>
+    <string name="sdfp_summary_custom">%s (Benutzerdefiniert)</string>
+
+
+    <!-- General purpose strings to reference from more specific context -->
+    <string name="about">Über</string>
+    <string name="add">Neu</string>
+    <string name="cancel">Abbrechen</string>
+    <string name="content">Inhalt</string>
+    <string name="date">Datum</string>
+    <string name="delete">Löschen</string>
+    <string name="discard">Verwerfen</string>
+    <string name="edit">Bearbeiten</string>
+    <string name="easteregg">Semmelknödel</string>
+    <string name="easteregg_1">NÖÖT NÖÖT!</string>
+    <string name="filters">Filter</string>
+    <string name="more">Mehr</string>
+    <string name="name">Name</string>
+    <string name="ok">OK</string>
+    <string name="save">Speichern</string>
+    <string name="search">Suche</string>
+    <string name="select_all">Alle auswählen</string>
+    <string name="settings">Einstellungen</string>
+    <string name="string_list_separator">", "</string>
+    <string name="tags">Stichwörter</string>
+    <string name="title">Titel</string>
+</resources>
