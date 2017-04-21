@@ -1,0 +1,24 @@
+# Name:
+
+Ownlog
+
+# Short description:
+
+Diary-like application, supporting tags for categorization
+
+
+# Description:
+
+Simple open-source diary-like application, supporting tags for categorization.
+
+Log entries consist of:
+- date/time
+- title
+- content
+- tags
+
+You can filter your log for tags, and also do a text search for title and content.
+
+To make sure only you can access your logs, you can also set up password protection.
+
+Source code: https://github.com/SpiritCroc/OwnLog
