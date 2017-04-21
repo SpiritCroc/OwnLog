@@ -58,26 +58,27 @@
 
     <com.google.android.flexbox.FlexboxLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
+        app:flexWrap="wrap">
         <TextView
             android:id="@+id/text_view_tags_strict_no_tags"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:gravity="center"
+            android:layout_gravity="center_vertical|start"
+            android:gravity="center_vertical|start"
             android:text="@string/edit_log_filter_tags_strict_no_tags" />
         <TextView
             android:id="@+id/text_view_tags_strict_tags"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:gravity="center"
+            android:layout_gravity="center_vertical|start"
+            android:gravity="center_vertical|start"
             android:text="@string/edit_log_filter_tags_strict_tags" />
         <CheckBox
             android:id="@+id/tags_strict_check"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_gravity="center" />
+            android:layout_gravity="center_vertical|start" />
     </com.google.android.flexbox.FlexboxLayout>
 
     <LinearLayout
