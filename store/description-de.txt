@@ -1,0 +1,24 @@
+# Name:
+
+Ownlog
+
+# Short description:
+
+Tagebuch-ähnliche Anwendung, mit Stichwörtern zur Kategorisierung
+
+
+# Description:
+
+Einfache quelloffene tagebuch-ähnliche Anwendung.
+
+Log-Einträge bestehen aus:
+- Datum/Uhrzeit
+- Titel
+- Inhalt
+- Stichworte
+
+Es kann nach Stichworten gefiltert werden, und auch nach Titel und Inhalt der Einträge gesucht werden.
+
+Weiterhin kann der Zugriff mit einem Passwortschutz versehen werden.
+
+Quellcode: https://github.com/SpiritCroc/OwnLog
