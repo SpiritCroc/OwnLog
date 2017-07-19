@@ -223,7 +223,9 @@ public class LogFragment extends BaseFragment implements PasswdHelper.RequestDbL
     @Override
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
-        outState.putLong(KEY_FILTER_ID, mLogFilters.get(mCurrentFilter).id);
+        if (mLogFilters != null) {
+            outState.putLong(KEY_FILTER_ID, mLogFilters.get(mCurrentFilter).id);
+        }
     }
 
     @Override
