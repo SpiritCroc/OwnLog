@@ -83,6 +83,7 @@
     <string name="edit_log_tags">Tags:</string>
     <string name="edit_log_tags_add">Add tag</string>
     <string name="edit_log_tags_add_new">New tag&#8230;</string>
+    <string name="edit_exclude_log_tags">Exclude tags:</string>
 
     <string name="edit_tag_item_name">@string/name</string>
     <string name="edit_tag_item_description">Description</string>

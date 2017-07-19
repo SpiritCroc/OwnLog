@@ -38,6 +38,7 @@ public class LogFilter {
     public String sortOrder = DEFAULT_SORT_ORDER;
     public boolean strictFilterTags = false;
     public ArrayList<TagItem> filterTagsList = new ArrayList<>();
+    public ArrayList<TagItem> filterExcludedTagsList = new ArrayList<>();
 
     public LogFilter(long id) {
         this.id = id;
@@ -83,6 +84,19 @@ public class LogFilter {
             for (int i = 1; i < filterTagsList.size(); i++) {
                 restriction += " OR " + DbContract.LogTags.COLUMN_TAG + " = "
                         + filterTagsList.get(i).id;
+            }
+            restriction += "))";
+            restrictions.add(restriction);
+        }
+        if (!filterExcludedTagsList.isEmpty()) {
+            String restriction = "NOT EXISTS (SELECT " + DbContract.LogTags.COLUMN_LOG
+                    + " FROM " + DbContract.LogTags.TABLE
+                    + " WHERE " + DbContract.LogTags.COLUMN_LOG + " = " + logId
+                    + " AND (" + DbContract.LogTags.COLUMN_TAG
+                    + " = " + filterExcludedTagsList.get(0).id;
+            for (int i = 1; i < filterExcludedTagsList.size(); i++) {
+                restriction += " OR " + DbContract.LogTags.COLUMN_TAG + " = "
+                        + filterExcludedTagsList.get(i).id;
             }
             restriction += "))";
             restrictions.add(restriction);

@@ -34,6 +34,13 @@ public class EditTagsView extends FlexboxLayout implements View.OnClickListener,
     private EditTagsProvider mTagsProvider;
     private int mInsertTagPosition;
 
+    private AvailableTagsFilter mAvailableTagsFilter = new AvailableTagsFilter() {
+        @Override
+        public boolean shouldShowTag(TagItem item) {
+            return !mTagsProvider.getSetTags().contains(item);
+        }
+    };
+
     private BroadcastReceiver mTagBroadcastReceiver;
 
     public EditTagsView(Context context) {
@@ -48,8 +55,20 @@ public class EditTagsView extends FlexboxLayout implements View.OnClickListener,
         super(context, attrs, defStyleAttr);
     }
 
+    protected int getAddTagButtonId() {
+        return R.id.add_tag_button;
+    }
+
+    protected int getEditTagMsgId() {
+        return R.id.tag_msg;
+    }
+
     public void setTagsProvider(EditTagsProvider provider) {
         mTagsProvider = provider;
+    }
+
+    public void setAvailableTagsFilter(AvailableTagsFilter filter) {
+        mAvailableTagsFilter = filter;
     }
 
     @Override
@@ -97,8 +116,8 @@ public class EditTagsView extends FlexboxLayout implements View.OnClickListener,
     @Override
     public void onFinishInflate() {
         super.onFinishInflate();
-        mAddTagButton = findViewById(R.id.add_tag_button);
-        View editTagMsg = findViewById(R.id.tag_msg);
+        mAddTagButton = findViewById(getAddTagButtonId());
+        View editTagMsg = findViewById(getEditTagMsgId());
         if (mAddTagButton != null) {
             mAddTagButton.setOnClickListener(this);
             mAddTagButton.setOnLongClickListener(this);
@@ -233,7 +252,7 @@ public class EditTagsView extends FlexboxLayout implements View.OnClickListener,
         final List<TagItem> setTags = mTagsProvider.getSetTags();
         final HashMap<String, TagItem> tagMap = new HashMap<>();
         for (TagItem tag: availableTags) {
-            if (!setTags.contains(tag)) {
+            if (mAvailableTagsFilter.shouldShowTag(tag)) {
                 menu.add(tag.name);
                 tagMap.put(tag.name, tag);
             }
@@ -264,5 +283,9 @@ public class EditTagsView extends FlexboxLayout implements View.OnClickListener,
         void onSetTagsChanged();
         // We need activity to get fragmentManager
         Activity getActivity();
+    }
+
+    public interface AvailableTagsFilter {
+        boolean shouldShowTag(TagItem tagItem);
     }
 }

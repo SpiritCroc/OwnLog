@@ -54,8 +54,8 @@ import de.spiritcroc.ownlog.data.LogFilter;
 import de.spiritcroc.ownlog.data.TagItem;
 import de.spiritcroc.ownlog.ui.view.EditTagsView;
 
-public class LogFilterEditFragment extends DialogFragment implements EditTagsView.EditTagsProvider,
-        PasswdHelper.RequestDbListener {
+public class LogFilterEditFragment extends DialogFragment
+        implements PasswdHelper.RequestDbListener {
 
     private static final String TAG = LogFilterEditFragment.class.getSimpleName();
 
@@ -78,8 +78,12 @@ public class LogFilterEditFragment extends DialogFragment implements EditTagsVie
             LogFilterEditFragment.class.getName() + ".set_strict_filter_tags";
     private static final String KEY_INIT_TAGS =
             LogItemEditFragment.class.getName() + ".init_tags";
+    private static final String KEY_INIT_EXCLUDED_TAGS =
+            LogItemEditFragment.class.getName() + ".init_excluded_tags";
     private static final String KEY_SET_TAGS =
             LogItemEditFragment.class.getName() + ".set_tags";
+    private static final String KEY_EXCLUDED_TAGS =
+            LogItemEditFragment.class.getName() + ".excluded_tags";
     private static final String KEY_AVAILABLE_TAGS =
             LogItemEditFragment.class.getName() + ".available_tags";
 
@@ -95,8 +99,10 @@ public class LogFilterEditFragment extends DialogFragment implements EditTagsVie
     private int mSortOrder;
     private boolean mInitStrictFilterTags = false;
     private ArrayList<TagItem> mInitTags = new ArrayList<>();
+    private ArrayList<TagItem> mInitExcludedTags = new ArrayList<>();
     private ArrayList<TagItem> mAvailableTags = new ArrayList<>();
     private ArrayList<TagItem> mSetTags = new ArrayList<>();
+    private ArrayList<TagItem> mExcludedTags = new ArrayList<>();
     private String[] mSortOrderValues;
 
     private EditText mEditName;
@@ -105,6 +111,7 @@ public class LogFilterEditFragment extends DialogFragment implements EditTagsVie
     private View mStrictFilterTagsInfoNoTags;
     private View mStrictFilterTagsInfoTags;
     private EditTagsView mEditTagsView;
+    private EditTagsView mEditExcludedTagsView;
 
     public LogFilterEditFragment setEditItemId(long id) {
         mAddItem = false;
@@ -125,7 +132,11 @@ public class LogFilterEditFragment extends DialogFragment implements EditTagsVie
         mStrictFilterTagsInfoNoTags = view.findViewById(R.id.text_view_tags_strict_no_tags);
         mStrictFilterTagsInfoTags = view.findViewById(R.id.text_view_tags_strict_tags);
         mEditTagsView = (EditTagsView) view.findViewById(R.id.edit_tags_view);
-        mEditTagsView.setTagsProvider(this);
+        mEditTagsView.setTagsProvider(mTagsProvider);
+        mEditTagsView.setAvailableTagsFilter(mAvailableTagsFilter);
+        mEditExcludedTagsView = (EditTagsView) view.findViewById(R.id.edit_excluded_tags_view);
+        mEditExcludedTagsView.setTagsProvider(mExcludedTagsProvider);
+        mEditExcludedTagsView.setAvailableTagsFilter(mAvailableTagsFilter);
 
         View.OnClickListener strictFilterInfoClickListener = new View.OnClickListener() {
             @Override
@@ -219,7 +230,9 @@ public class LogFilterEditFragment extends DialogFragment implements EditTagsVie
         mCheckStrictFilterTags.setChecked(mInitStrictFilterTags);
 
         mSetTags = (ArrayList<TagItem>) mInitTags.clone();
+        mExcludedTags = (ArrayList<TagItem>) mInitExcludedTags.clone();
         mEditTagsView.updateContent();
+        mEditExcludedTagsView.updateContent();
 
         updateStrictFilterTagsInfo();
     }
@@ -252,8 +265,12 @@ public class LogFilterEditFragment extends DialogFragment implements EditTagsVie
                 mSortOrder = savedInstanceState.getInt(KEY_SORT_ORDER);
                 mInitTags = new ArrayList<>(Arrays.asList(
                         (TagItem[]) savedInstanceState.getParcelableArray(KEY_INIT_TAGS)));
+                mInitExcludedTags = new ArrayList<>(Arrays.asList(
+                        (TagItem[]) savedInstanceState.getParcelableArray(KEY_INIT_EXCLUDED_TAGS)));
                 mSetTags = new ArrayList<>(Arrays.asList(
                         (TagItem[]) savedInstanceState.getParcelableArray(KEY_SET_TAGS)));
+                mExcludedTags = new ArrayList<>(Arrays.asList(
+                        (TagItem[]) savedInstanceState.getParcelableArray(KEY_EXCLUDED_TAGS)));
                 mAvailableTags = new ArrayList<>(Arrays.asList(
                         (TagItem[]) savedInstanceState.getParcelableArray(KEY_AVAILABLE_TAGS)));
 
@@ -265,6 +282,7 @@ public class LogFilterEditFragment extends DialogFragment implements EditTagsVie
                 mSpinSortOrder.setSelection(mSortOrder);
 
                 mEditTagsView.updateContent();
+                mEditExcludedTagsView.updateContent();
                 updateStrictFilterTagsInfo();
                 return true;
             }
@@ -287,8 +305,12 @@ public class LogFilterEditFragment extends DialogFragment implements EditTagsVie
         outState.putBoolean(KEY_SET_STRICT_TAG_FILTER, mCheckStrictFilterTags.isChecked());
         outState.putParcelableArray(KEY_INIT_TAGS,
                 mInitTags.toArray(new TagItem[mInitTags.size()]));
+        outState.putParcelableArray(KEY_INIT_EXCLUDED_TAGS,
+                mInitExcludedTags.toArray(new TagItem[mInitExcludedTags.size()]));
         outState.putParcelableArray(KEY_SET_TAGS,
                 mSetTags.toArray(new TagItem[mSetTags.size()]));
+        outState.putParcelableArray(KEY_EXCLUDED_TAGS,
+                mExcludedTags.toArray(new TagItem[mExcludedTags.size()]));
         outState.putParcelableArray(KEY_AVAILABLE_TAGS,
                 mAvailableTags.toArray(new TagItem[mAvailableTags.size()]));
     }
@@ -342,6 +364,7 @@ public class LogFilterEditFragment extends DialogFragment implements EditTagsVie
                 mInitSortOrder = logFilter.sortOrder;
                 mInitStrictFilterTags = logFilter.strictFilterTags;
                 mInitTags = logFilter.filterTagsList;
+                mInitExcludedTags = logFilter.filterExcludedTagsList;
                 initValues(getDialog());
             }
         }
@@ -356,7 +379,8 @@ public class LogFilterEditFragment extends DialogFragment implements EditTagsVie
         return mInitName.equals(mEditName.getText().toString())
                 && mInitSortOrder.equals(mSortOrderValues[mSortOrder])
                 && mInitStrictFilterTags == mCheckStrictFilterTags.isChecked()
-                && TagItem.checkTagListDiff(mInitTags, mSetTags, null, null);
+                && TagItem.checkTagListDiff(mInitTags, mSetTags, null, null)
+                && TagItem.checkTagListDiff(mInitExcludedTags, mExcludedTags, null, null);
     }
 
     private void saveChanges() {
@@ -386,13 +410,26 @@ public class LogFilterEditFragment extends DialogFragment implements EditTagsVie
         // Tags
         ArrayList<TagItem> addedTags = new ArrayList<>();
         ArrayList<TagItem> removedTags = new ArrayList<>();
+        ArrayList<TagItem> addedExcludedTags = new ArrayList<>();
+        ArrayList<TagItem> removedExcludedTags = new ArrayList<>();
         TagItem.checkTagListDiff(mInitTags, mSetTags, addedTags, removedTags);
-        for (TagItem tag: addedTags) {
-            ContentValues tagValues = new ContentValues();
-            tagValues.put(DbContract.LogFilter_Tags.COLUMN_FILTER, id);
-            tagValues.put(DbContract.LogFilter_Tags.COLUMN_TAG, tag.id);
-            db.insert(DbContract.LogFilter_Tags.TABLE, "null", tagValues);
-        }
+        TagItem.checkTagListDiff(mInitExcludedTags, mExcludedTags,
+                addedExcludedTags, removedExcludedTags);
+        // First remove tags to avoid illegal states
+        removeTags(db, id, removedTags);
+        removeTags(db, id, removedExcludedTags);
+        addTags(db, id, addedTags, false);
+        addTags(db, id, addedExcludedTags, true);
+        db.close();
+        finish();
+        // Notify about changes
+        LocalBroadcastManager.getInstance(getActivity()).sendBroadcast(
+                new Intent(Constants.EVENT_LOG_UPDATE)
+                        .putExtra(Constants.EXTRA_LOG_FILTER_ITEM_ID, id)
+        );
+    }
+
+    private void removeTags(SQLiteDatabase db, long id, ArrayList<TagItem> removedTags) {
         if (!removedTags.isEmpty()) {
             String selection = DbContract.LogFilter_Tags.COLUMN_FILTER + " = ? AND ("
                     + DbContract.LogFilter_Tags.COLUMN_TAG + " = ?";
@@ -406,13 +443,17 @@ public class LogFilterEditFragment extends DialogFragment implements EditTagsVie
             selection += ")";
             db.delete(DbContract.LogFilter_Tags.TABLE, selection, selectionArgs);
         }
-        db.close();
-        finish();
-        // Notify about changes
-        LocalBroadcastManager.getInstance(getActivity()).sendBroadcast(
-                new Intent(Constants.EVENT_LOG_UPDATE)
-                        .putExtra(Constants.EXTRA_LOG_FILTER_ITEM_ID, id)
-        );
+    }
+
+    private void addTags(SQLiteDatabase db, long id, ArrayList<TagItem> addedTags,
+                         boolean excluded) {
+        for (TagItem tag: addedTags) {
+            ContentValues tagValues = new ContentValues();
+            tagValues.put(DbContract.LogFilter_Tags.COLUMN_FILTER, id);
+            tagValues.put(DbContract.LogFilter_Tags.COLUMN_TAG, tag.id);
+            tagValues.put(DbContract.LogFilter_Tags.COLUMN_EXCLUDE_TAG, excluded);
+            db.insert(DbContract.LogFilter_Tags.TABLE, "null", tagValues);
+        }
     }
 
     private void promptDelete() {
@@ -470,25 +511,69 @@ public class LogFilterEditFragment extends DialogFragment implements EditTagsVie
         }
     }
 
-    @Override
-    public List<TagItem> getAvailableTags() {
-        return mAvailableTags;
-    }
+    private EditTagsView.EditTagsProvider mTagsProvider = new EditTagsView.EditTagsProvider() {
+        @Override
+        public List<TagItem> getAvailableTags() {
+            return mAvailableTags;
+        }
 
-    @Override
-    public List<TagItem> getSetTags() {
-        return mSetTags;
-    }
+        @Override
+        public List<TagItem> getSetTags() {
+            return mSetTags;
+        }
 
-    @Override
-    public void onDeleteTag(TagItem item) {
-        mInitTags.remove(item);
-    }
+        @Override
+        public void onDeleteTag(TagItem item) {
+            mInitTags.remove(item);
+        }
 
-    @Override
-    public void onSetTagsChanged() {
-        updateStrictFilterTagsInfo();
-    }
+        @Override
+        public void onSetTagsChanged() {
+            updateStrictFilterTagsInfo();
+            //mEditExcludedTagsView.updateContent();
+        }
+
+        @Override
+        public Activity getActivity() {
+            return LogFilterEditFragment.this.getActivity();
+        }
+    };
+
+    private EditTagsView.EditTagsProvider mExcludedTagsProvider =
+            new EditTagsView.EditTagsProvider() {
+                @Override
+                public List<TagItem> getAvailableTags() {
+                    return mAvailableTags;
+                }
+
+                @Override
+                public List<TagItem> getSetTags() {
+                    return mExcludedTags;
+                }
+
+                @Override
+                public void onDeleteTag(TagItem item) {
+                    mInitTags.remove(item);
+                }
+
+                @Override
+                public void onSetTagsChanged() {
+                    //mEditTagsView.updateContent();
+                }
+
+                @Override
+                public Activity getActivity() {
+                    return LogFilterEditFragment.this.getActivity();
+                }
+    };
+
+    private EditTagsView.AvailableTagsFilter mAvailableTagsFilter =
+            new EditTagsView.AvailableTagsFilter() {
+                @Override
+                public boolean shouldShowTag(TagItem tagItem) {
+                    return !mSetTags.contains(tagItem) && !mExcludedTags.contains(tagItem);
+                }
+    };
 
     private void finish() {
         dismiss();

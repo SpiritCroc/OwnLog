@@ -53,5 +53,6 @@ public abstract class DbContract {
         public static final String TABLE = "log_filter_tags";
         public static final String COLUMN_FILTER = "filter_id";
         public static final String COLUMN_TAG = "tag_id";
+        public static final String COLUMN_EXCLUDE_TAG = "exclude_tag";
     }
 }

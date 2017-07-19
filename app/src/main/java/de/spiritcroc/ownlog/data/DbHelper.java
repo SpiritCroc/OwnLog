@@ -37,7 +37,7 @@ public class DbHelper extends SQLiteOpenHelper {
 
     private static boolean INITIALIZED = false;
 
-    public static final int VERSION = 3;
+    public static final int VERSION = 4;
     public static final String NAME = "log.db";
     public static final String NAME_COPY = "log2.db";
     private static final String NAME_BACKUP = "log_backup.db";
@@ -52,6 +52,7 @@ public class DbHelper extends SQLiteOpenHelper {
     private static final String PRIMARY_KEY = " PRIMARY KEY";
     private static final String UNIQUE = " UNIQUE";
     private static final String NOT_NULL = " NOT NULL";
+    private static final String DEFAULT = " DEFAULT ";
     private static final String REFERENCES = " REFERENCES ";
     private static final String ON_DELETE = " ON DELETE";
     private static final String ON_CONFLICT = " ON CONFLICT";
@@ -98,6 +99,8 @@ public class DbHelper extends SQLiteOpenHelper {
                     DbContract.LogFilter_Tags.COLUMN_TAG + INTEGER + REFERENCES +
                             DbContract.Tag.TABLE + "(" + DbContract.Tag._ID + ")" +
                                     ON_DELETE + CASCADE + COMMA_SEP +
+                    DbContract.LogFilter_Tags.COLUMN_EXCLUDE_TAG + BOOLEAN + NOT_NULL +
+                            DEFAULT + "FALSE" + COMMA_SEP +
                     UNIQUE + " (" + DbContract.LogFilter_Tags.COLUMN_FILTER + COMMA_SEP +
                             DbContract.LogFilter_Tags.COLUMN_TAG + ")" + ON_CONFLICT + IGNORE + ")";
 
@@ -134,13 +137,15 @@ public class DbHelper extends SQLiteOpenHelper {
                 // Add description to tags
                 db.execSQL("alter table " + DbContract.Tag.TABLE + " add " +
                         DbContract.Tag.COLUMN_DESCRIPTION + TEXT);
-                break;
             case 2:
                 // Add new tables for log filters
                 db.execSQL(SQL_CREATE_LOG_FILTER);
                 db.execSQL(SQL_CREATE_LOG_FILTER_TAGS);
-                break;
-            // Remember to add breaks!
+            case 3:
+                // LogFilter_Tags: add exclude boolean
+                db.execSQL("alter table " + DbContract.LogFilter_Tags.TABLE + " add " +
+                        DbContract.LogFilter_Tags.COLUMN_EXCLUDE_TAG + BOOLEAN + NOT_NULL + DEFAULT + "FALSE");
+                break; // Remember to keep a break before default!
             default:
                 Log.e(TAG, "unhandled upgrade from " + oldVersion + " to " +
                         newVersion + "; discarding content");

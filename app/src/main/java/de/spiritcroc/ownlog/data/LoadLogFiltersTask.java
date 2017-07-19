@@ -100,6 +100,7 @@ public abstract class LoadLogFiltersTask extends AsyncTask<Void, Void, ArrayList
                     "t." + DbContract.Tag._ID + " AS mId",
                     "t." + DbContract.Tag.COLUMN_NAME + " AS mName",
                     "t." + DbContract.Tag.COLUMN_DESCRIPTION + " AS mDescription",
+                    "lt." + DbContract.LogFilter_Tags.COLUMN_EXCLUDE_TAG + " AS mExcludeTag"
             };
             String tagSelection = "lt." + DbContract.LogFilter_Tags.COLUMN_FILTER + " = " + item.id;
             Cursor tagCursor = db.query(tagTable, tagProjection, tagSelection, null, null,
@@ -107,7 +108,9 @@ public abstract class LoadLogFiltersTask extends AsyncTask<Void, Void, ArrayList
             int tagIndexId = tagCursor.getColumnIndex("mId");
             int tagIndexName = tagCursor.getColumnIndex("mName");
             int tagIndexDescription = tagCursor.getColumnIndex("mDescription");
+            int tagIndexExcludeTag = tagCursor.getColumnIndex("mExcludeTag");
             item.filterTagsList.clear();
+            item.filterExcludedTagsList.clear();
             if (tagCursor.moveToFirst()) {
                 do {
                     TagItem  tagItem = new TagItem(-1);
@@ -120,7 +123,13 @@ public abstract class LoadLogFiltersTask extends AsyncTask<Void, Void, ArrayList
                     if (tagIndexDescription >= 0) {
                         tagItem.description = tagCursor.getString(tagIndexDescription);
                     }
-                    item.filterTagsList.add(tagItem);
+                    boolean excluded = tagIndexExcludeTag >= 0 &&
+                            tagCursor.getInt(tagIndexExcludeTag) != 0;
+                    if (excluded) {
+                        item.filterExcludedTagsList.add(tagItem);
+                    } else {
+                        item.filterTagsList.add(tagItem);
+                    }
                 } while (tagCursor.moveToNext());
             }
             tagCursor.close();
