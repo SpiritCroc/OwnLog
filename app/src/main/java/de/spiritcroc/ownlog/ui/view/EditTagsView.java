@@ -5,6 +5,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.res.TypedArray;
 import android.os.Parcelable;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.AttributeSet;
@@ -33,6 +34,8 @@ public class EditTagsView extends FlexboxLayout implements View.OnClickListener,
     private View mAddTagButton;
     private EditTagsProvider mTagsProvider;
     private int mInsertTagPosition;
+    private int mAddTagButtonId;
+    private int mEditTagMessageId;
 
     private AvailableTagsFilter mAvailableTagsFilter = new AvailableTagsFilter() {
         @Override
@@ -53,14 +56,17 @@ public class EditTagsView extends FlexboxLayout implements View.OnClickListener,
 
     public EditTagsView(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
+        init(attrs);
     }
 
-    protected int getAddTagButtonId() {
-        return R.id.add_tag_button;
-    }
-
-    protected int getEditTagMsgId() {
-        return R.id.tag_msg;
+    private void init(AttributeSet attrs) {
+        if (attrs != null) {
+            final TypedArray ta = getContext().obtainStyledAttributes(attrs,
+                    R.styleable.EditTagsView);
+            mAddTagButtonId = ta.getResourceId(R.styleable.EditTagsView_addTagButton, 0);
+            mEditTagMessageId = ta.getResourceId(R.styleable.EditTagsView_editTagMessageView, 0);
+            ta.recycle();
+        }
     }
 
     public void setTagsProvider(EditTagsProvider provider) {
@@ -116,8 +122,8 @@ public class EditTagsView extends FlexboxLayout implements View.OnClickListener,
     @Override
     public void onFinishInflate() {
         super.onFinishInflate();
-        mAddTagButton = findViewById(getAddTagButtonId());
-        View editTagMsg = findViewById(getEditTagMsgId());
+        mAddTagButton = findViewById(mAddTagButtonId);
+        View editTagMsg = findViewById(mEditTagMessageId);
         if (mAddTagButton != null) {
             mAddTagButton.setOnClickListener(this);
             mAddTagButton.setOnLongClickListener(this);

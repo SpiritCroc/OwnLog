@@ -30,4 +30,8 @@
         <attr name="emptyReplacementValue" format="reference" />
     </declare-styleable>
 
+    <declare-styleable name="EditTagsView">
+        <attr name="addTagButton" format="reference" />
+        <attr name="editTagMessageView" format="reference" />
+    </declare-styleable>
 </resources>
