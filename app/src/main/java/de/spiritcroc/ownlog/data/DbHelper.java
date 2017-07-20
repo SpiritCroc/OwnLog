@@ -37,7 +37,7 @@ public class DbHelper extends SQLiteOpenHelper {
 
     private static boolean INITIALIZED = false;
 
-    public static final int VERSION = 4;
+    public static final int VERSION = 5;
     public static final String NAME = "log.db";
     public static final String NAME_COPY = "log2.db";
     private static final String NAME_BACKUP = "log_backup.db";
@@ -45,6 +45,7 @@ public class DbHelper extends SQLiteOpenHelper {
     private static final String TEXT = " TEXT";
     private static final String INTEGER = " INTEGER";
     private static final String BOOLEAN = " BOOLEAN";
+    private static final String BLOB = " BLOB";
 
     private static final String CREATE_TABLE = "CREATE TABLE ";
     private static final String DROP_TABLE = "DROP TABLE IF EXISTS ";
@@ -58,6 +59,7 @@ public class DbHelper extends SQLiteOpenHelper {
     private static final String ON_CONFLICT = " ON CONFLICT";
     private static final String CASCADE = " CASCADE";
     private static final String IGNORE = " IGNORE";
+    private static final String FAIL = " FAIL";
 
     private static final String COMMA_SEP = ",";
 
@@ -68,10 +70,24 @@ public class DbHelper extends SQLiteOpenHelper {
             DbContract.Log.COLUMN_TITLE + TEXT + COMMA_SEP +
             DbContract.Log.COLUMN_CONTENT + TEXT + " )";
 
-    private static final String SQL_CREATE_TAG = CREATE_TABLE + DbContract.Tag.TABLE + " (" +
-            DbContract.Tag._ID + INTEGER + PRIMARY_KEY + COMMA_SEP +
-            DbContract.Tag.COLUMN_NAME + TEXT + COMMA_SEP +
-            DbContract.Tag.COLUMN_DESCRIPTION + TEXT + " )";
+    private static final String SQL_CREATE_LOG_ATTACHMENT =
+            CREATE_TABLE + DbContract.LogAttachment.TABLE + "(" +
+                    DbContract.LogAttachment._ID + INTEGER + PRIMARY_KEY + COMMA_SEP +
+                    DbContract.LogAttachment.COLUMN_LOG + INTEGER + NOT_NULL + REFERENCES +
+                            DbContract.Log.TABLE + "(" + DbContract.Log._ID + ")" +
+                                    ON_DELETE + CASCADE + COMMA_SEP +
+                    DbContract.LogAttachment.COLUMN_ATTACHMENT_NAME + TEXT + COMMA_SEP +
+                    DbContract.LogAttachment.COLUMN_ATTACHMENT_TYPE + TEXT + COMMA_SEP +
+                    DbContract.LogAttachment.COLUMN_ATTACHMENT_DATA + BLOB + COMMA_SEP +
+                    UNIQUE + " (" + DbContract.LogAttachment.COLUMN_LOG + COMMA_SEP +
+                            DbContract.LogAttachment.COLUMN_ATTACHMENT_NAME + ")" +
+                                    ON_CONFLICT + FAIL + ")";
+
+    private static final String SQL_CREATE_TAG =
+            CREATE_TABLE + DbContract.Tag.TABLE + " (" +
+                    DbContract.Tag._ID + INTEGER + PRIMARY_KEY + COMMA_SEP +
+                    DbContract.Tag.COLUMN_NAME + TEXT + COMMA_SEP +
+                    DbContract.Tag.COLUMN_DESCRIPTION + TEXT + " )";
 
     private static final String SQL_CREATE_LOG_TAGS =
             CREATE_TABLE + DbContract.LogTags.TABLE + " (" +
@@ -124,6 +140,7 @@ public class DbHelper extends SQLiteOpenHelper {
     @Override
     public void onCreate(SQLiteDatabase db) {
         db.execSQL(SQL_CREATE_LOG);
+        db.execSQL(SQL_CREATE_LOG_ATTACHMENT);
         db.execSQL(SQL_CREATE_TAG);
         db.execSQL(SQL_CREATE_LOG_TAGS);
         db.execSQL(SQL_CREATE_LOG_FILTER);
@@ -145,6 +162,9 @@ public class DbHelper extends SQLiteOpenHelper {
                 // LogFilter_Tags: add exclude boolean
                 db.execSQL("alter table " + DbContract.LogFilter_Tags.TABLE + " add " +
                         DbContract.LogFilter_Tags.COLUMN_EXCLUDE_TAG + BOOLEAN + NOT_NULL + DEFAULT + "FALSE");
+            case 4:
+                // Create Attachment table
+                db.execSQL(SQL_CREATE_LOG_ATTACHMENT);
                 break; // Remember to keep a break before default!
             default:
                 Log.e(TAG, "unhandled upgrade from " + oldVersion + " to " +
@@ -166,6 +186,7 @@ public class DbHelper extends SQLiteOpenHelper {
 
     private void recreateDb(SQLiteDatabase db) {
         db.execSQL(DROP_TABLE + DbContract.Log.TABLE);
+        db.execSQL(DROP_TABLE + DbContract.LogAttachment.TABLE);
         db.execSQL(DROP_TABLE + DbContract.Tag.TABLE);
         db.execSQL(DROP_TABLE + DbContract.LogTags.TABLE);
         db.execSQL(DROP_TABLE + DbContract.LogFilter.TABLE);

@@ -24,6 +24,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.design.widget.BottomSheetBehavior;
 import android.support.v4.content.LocalBroadcastManager;
 import android.text.TextUtils;
 import android.util.Log;
@@ -48,19 +49,26 @@ import de.spiritcroc.ownlog.data.LoadLogItemsTask;
 import de.spiritcroc.ownlog.data.LogItem;
 import de.spiritcroc.ownlog.data.TagItem;
 import de.spiritcroc.ownlog.ui.activity.SingleFragmentActivity;
+import de.spiritcroc.ownlog.ui.view.EndListeningScrollView;
 
 public class LogItemShowFragment extends BaseFragment implements PasswdHelper.RequestDbListener {
 
     private static final String TAG = LogItemShowFragment.class.getSimpleName();
 
+    private static final String FRAGMENT_TAG_ATTACHMENTS = TAG + ".attachments";
+
     private static final int DB_REQUEST_LOAD = 1;
     private static final int DB_REQUEST_DELETE = 2;
 
     private long mItemId = -1;
+    private boolean mReloadRequred = true;
 
     private TextView mTitleView;
     private TextView mContentView;
     private TextView mTagsView;
+    private View mAttachmentsPlaceholderView;
+    private BottomSheetBehavior mBottomSheetBehavior;
+    private LogAttachmentsShowFragment mAttachmentsFragment;
 
     public static void show(Context context, @NonNull LogItem logItem) {
         Intent intent = new Intent(context, SingleFragmentActivity.class)
@@ -96,14 +104,87 @@ public class LogItemShowFragment extends BaseFragment implements PasswdHelper.Re
         mTitleView = (TextView) v.findViewById(R.id.title_view);
         mContentView = (TextView) v.findViewById(R.id.content_view);
         mTagsView = (TextView) v.findViewById(R.id.tags_view);
+        mAttachmentsPlaceholderView = v.findViewById(R.id.attachments_placeholder);
+        final View attachmentsStubView = v.findViewById(R.id.attachments_stub);
+
+        mBottomSheetBehavior = BottomSheetBehavior.from(attachmentsStubView);
+        updateBottomSheet(false);
+
+        if (savedInstanceState == null) {
+            mAttachmentsFragment = new LogAttachmentsShowFragment();
+            Bundle attachmentArgs = new Bundle();
+            attachmentArgs.putLong(Constants.EXTRA_LOG_ITEM_ID, mItemId);
+            mAttachmentsFragment.setArguments(attachmentArgs);
+            getFragmentManager().beginTransaction()
+                    .add(R.id.attachments_stub, mAttachmentsFragment, FRAGMENT_TAG_ATTACHMENTS)
+                    .commit();
+        } else {
+            mAttachmentsFragment = (LogAttachmentsShowFragment) getFragmentManager()
+                    .findFragmentByTag(FRAGMENT_TAG_ATTACHMENTS);
+        }
+
+        final EndListeningScrollView scrollView =
+                ((EndListeningScrollView) v.findViewById(R.id.scroll_view));
+        scrollView.setBottomTriggerHeight(getResources()
+                .getDimensionPixelSize(R.dimen.attachments_peek_height)/2);
+        scrollView.setEndListener(
+                new EndListeningScrollView.EndListener() {
+                    @Override
+                    public void onBottomReached() {
+                        updateBottomSheet(true);
+                    }
+
+                    @Override
+                    public void onBottomLeft() {
+                        updateBottomSheet(false);
+                    }
+                }
+        );
+
+        mAttachmentsFragment.setTitleOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (mBottomSheetBehavior.getState() == BottomSheetBehavior.STATE_EXPANDED) {
+                    mBottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
+                } else {
+                    mBottomSheetBehavior.setState(BottomSheetBehavior.STATE_EXPANDED);
+                }
+            }
+        });
+        mAttachmentsFragment.setOnUpdateListener(new LogAttachmentsShowFragment.OnUpdateListener() {
+            @Override
+            public void onAttachmentsUpdate() {
+                mAttachmentsPlaceholderView.setVisibility(mAttachmentsFragment.hasAttachments()
+                        ? View.VISIBLE : View.GONE);
+                attachmentsStubView.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        updateBottomSheet(scrollView.isAtEnd());
+                    }
+                });
+            }
+        });
 
         return v;
+    }
+
+    private void updateBottomSheet(boolean shouldShow) {
+        if (shouldShow && mAttachmentsFragment.hasAttachments()) {
+            mBottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
+            mBottomSheetBehavior.setHideable(false);
+        } else {
+            mBottomSheetBehavior.setHideable(true);
+            mBottomSheetBehavior.setState(BottomSheetBehavior.STATE_HIDDEN);
+        }
     }
 
     @Override
     public void onResume() {
         super.onResume();
-        loadContent();
+        if (mReloadRequred) {
+            loadContent();
+            mReloadRequred = false;
+        }
     }
 
     @Override
@@ -116,6 +197,8 @@ public class LogItemShowFragment extends BaseFragment implements PasswdHelper.Re
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.action_edit:
+                mReloadRequred = true;
+                mAttachmentsFragment.setReloadRequired();
                 LogItemEditFragment.show(getActivity(), new LogItem(mItemId));
                 return true;
             case R.id.action_delete:
@@ -137,6 +220,17 @@ public class LogItemShowFragment extends BaseFragment implements PasswdHelper.Re
                 break;
             default:
                 Log.e(TAG, "receiveWritableDatabase: unknwon requestId " + requestId);
+        }
+    }
+
+    @Override
+    public boolean onUpOrBackPressed(boolean backPress) {
+        if (backPress &&
+                mBottomSheetBehavior.getState() == BottomSheetBehavior.STATE_EXPANDED) {
+            mBottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
+            return true;
+        } else {
+            return super.onUpOrBackPressed(backPress);
         }
     }
 
@@ -242,6 +336,7 @@ public class LogItemShowFragment extends BaseFragment implements PasswdHelper.Re
         String selection = DbContract.Log._ID + " = ?";
         String[] selectionArgs = {String.valueOf(mItemId)};
         db.delete(DbContract.Log.TABLE, selection, selectionArgs);
+        db.close();
         finish();
         // Notify about deleted item
         LocalBroadcastManager.getInstance(getActivity()).sendBroadcast(

@@ -21,10 +21,15 @@
     <attr name="textColorListDate3" format="color" />
     <attr name="textColorListTitle" format="color" />
     <attr name="textColorListTag" format="color" />
+    <attr name="foregroundColorListAttachment" format="color" />
     <attr name="backgroundColorListHeader" format="color" />
     <attr name="backgroundColorListItem" format="color" />
     <attr name="backgroundColorListItemSelected" format="color" />
     <attr name="backgroundColorEditTagView" format="color" />
+    <attr name="backgroundColorPeekTitle" format="color" />
+    <attr name="backgroundColorPeekContent" format="color" />
+    <attr name="backgroundColorPeekCard" format="color" />
+    <attr name="backgroundColorPeekActionBar" format="color" />
 
     <declare-styleable name="SimpleDateFormatPreference">
         <attr name="emptyReplacementValue" format="reference" />

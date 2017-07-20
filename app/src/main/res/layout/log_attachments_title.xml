@@ -14,16 +14,15 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 -->
 
-<menu xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto">
-    <item
-        android:id="@+id/action_attachments"
-        android:title="@string/action_attachments"
-        android:icon="@drawable/ic_attachment"
-        app:showAsAction="ifRoom" />
-    <item
-        android:id="@+id/action_save"
-        android:title="@string/action_save"
-        android:icon="@drawable/ic_save"
-        app:showAsAction="always" />
-</menu>
+<TextView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/attachments_title"
+    android:layout_width="match_parent"
+    android:layout_height="@dimen/attachments_title_height"
+    android:theme="@style/AttachmentsTitle"
+    android:text="@string/log_attachments_show"
+    android:textSize="@dimen/attachments_title_text_size"
+    android:gravity="start|center_vertical"
+    android:padding="@dimen/attachments_title_padding"
+    android:drawableStart="@drawable/ic_attachment_title"
+    android:drawablePadding="@dimen/attachments_title_padding" />

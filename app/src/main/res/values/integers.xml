@@ -17,4 +17,7 @@
 <resources>
     <integer name="list_smooth_scroll_duration">200</integer>
     <integer name="list_fade_duration">700</integer>
+
+    <!-- 1: Fullscreen, 2: Half screen, ... -->
+    <integer name="attachment_picture_preview_scale">2</integer>
 </resources>

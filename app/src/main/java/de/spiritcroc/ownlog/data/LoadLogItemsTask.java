@@ -99,6 +99,9 @@ public abstract class LoadLogItemsTask extends AsyncTask<Void, Void, ArrayList<L
                 }
                 tagCursor.close();
             }
+            if (shouldCheckAttachments()) {
+                item.hasAttachments = LoadLogItemAttachmentsTask.hasAttachments(mDb, item.id);
+            }
             result.add(item);
         } while (cursor.moveToNext());
         cursor.close();
@@ -126,5 +129,9 @@ public abstract class LoadLogItemsTask extends AsyncTask<Void, Void, ArrayList<L
 
     protected boolean shouldLoadTags() {
         return true;
+    }
+
+    protected boolean shouldCheckAttachments() {
+        return false;
     }
 }

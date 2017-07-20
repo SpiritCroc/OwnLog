@@ -31,6 +31,7 @@ public class LogItem implements Parcelable, DateFormatter.DateProvider {
     public long timeEnd = -1;
     public String title = "";
     public String content = "";
+    public boolean hasAttachments = false;
     public ArrayList<TagItem> tags;
 
     public LogItem(long id) {
@@ -81,8 +82,9 @@ public class LogItem implements Parcelable, DateFormatter.DateProvider {
     public void writeToParcel(Parcel out, int flags) {
         out.writeLongArray(new long[]{id, time, timeEnd});
         out.writeStringArray(new String[]{title, content});
+        out.writeBooleanArray(new boolean[]{hasAttachments});
         if (tags != null) {
-            out.writeTypedArray(tags.toArray(new TagItem[tags.size()]), 0);
+            out.writeTypedList(tags);
         }
     }
 
@@ -92,7 +94,9 @@ public class LogItem implements Parcelable, DateFormatter.DateProvider {
         public LogItem createFromParcel(Parcel in) {
             long[] longs = in.createLongArray();
             String[] strings = in.createStringArray();
+            boolean[] bools = in.createBooleanArray();
             LogItem result = new LogItem(longs[0], longs[1], longs[2], strings[0], strings[1]);
+            result.hasAttachments = bools[0];
             result.tags = in.createTypedArrayList(TagItem.CREATOR);
             return result;
         }
@@ -102,4 +106,63 @@ public class LogItem implements Parcelable, DateFormatter.DateProvider {
             return new LogItem[size];
         }
     };
+
+    public static class Attachment implements Parcelable {
+        public long id;
+        public long logId;
+        public String name;
+        public String type;
+        public byte[] data;
+
+        /*
+         * Empty constructor for LoadLogItemAttachmentsTask
+         */
+        Attachment() {}
+
+        public Attachment(long id, long logId, String name, String type, byte[] data) {
+            this.id = id;
+            this.logId = logId;
+            this.name = name;
+            this.type = type;
+            this.data = data;
+        }
+
+        public static long generateId() {
+            return System.currentTimeMillis();
+        }
+
+        @Override
+        public int describeContents() {
+            return 0;
+        }
+
+        @Override
+        public void writeToParcel(Parcel out, int flags) {
+            out.writeLongArray(new long[]{id, logId});
+            out.writeStringArray(new String[]{name, type});
+            out.writeByteArray(data);
+        }
+
+        public static final Parcelable.Creator<Attachment> CREATOR
+            = new Parcelable.Creator<Attachment>() {
+            @Override
+            public Attachment createFromParcel(Parcel in) {
+                long[] longs = in.createLongArray();
+                String[] strings = in.createStringArray();
+                return new Attachment(longs[0], longs[1], strings[0], strings[1],
+                        in.createByteArray());
+            }
+
+            @Override
+            public Attachment[] newArray(int size) {
+                return new Attachment[size];
+            }
+        };
+
+        @Override
+        public String toString() {
+            return getClass().getSimpleName() + " (" + id + ";" + logId + ";" + name + ";" + type
+                    + ";" + data.length + ")";
+        }
+    }
 }

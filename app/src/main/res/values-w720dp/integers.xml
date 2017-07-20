@@ -14,16 +14,7 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 -->
 
-<menu xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto">
-    <item
-        android:id="@+id/action_attachments"
-        android:title="@string/action_attachments"
-        android:icon="@drawable/ic_attachment"
-        app:showAsAction="ifRoom" />
-    <item
-        android:id="@+id/action_save"
-        android:title="@string/action_save"
-        android:icon="@drawable/ic_save"
-        app:showAsAction="always" />
-</menu>
+<resources>
+    <!-- 1: Fullscreen, 2: Half screen, ... -->
+    <integer name="attachment_picture_preview_scale">3</integer>
+</resources>

@@ -28,7 +28,7 @@ public abstract class BaseFragment extends Fragment {
      * @return
      * True if fragment wants to overwrite back/up navigation behaviour
      */
-    public boolean onUpOrBackPressed() {
+    public boolean onUpOrBackPressed(boolean backPress) {
         return false;
     }
 }

@@ -28,6 +28,7 @@
     <string name="title_log_filter_edit">Edit filter</string>
 
     <string name="action_add">@string/add</string>
+    <string name="action_attachments">@string/attachments</string>
     <string name="action_delete">@string/delete</string>
     <string name="action_edit">@string/edit</string>
     <string name="action_save">@string/save</string>
@@ -68,6 +69,8 @@
     <string name="dialog_select_tags">Select tags</string>
     <string name="dialog_delete_log_filter_entry_title">Delete filter \"%s\"?</string>
     <string name="dialog_deleted_log_filter_entry_toast_title">Deleted filter \"%s\"</string>
+    <string name="dialog_delete_attachment">Delete \"%s\"?</string>
+    <string name="dialog_delete_attachment_title">Delete attachment</string>
 
     <string name="edit_password_hint">Enter password</string>
     <string name="edit_wrong_password">Wrong password</string>
@@ -85,12 +88,25 @@
     <string name="edit_log_tags_add_new">New tag&#8230;</string>
     <string name="edit_exclude_log_tags">Exclude tags:</string>
 
+    <string name="has_attachments">Has attachments</string>
+    <string name="log_attachments_show">@string/attachments</string>
+    <string name="edit_log_attachments_add">Add attachment</string>
+    <string name="edit_log_attachment_rename">@string/rename</string>
+    <string name="edit_log_attachment_rename_title">Enter name</string>
+    <string name="edit_log_attachment_delete">@string/delete</string>
+    <string name="edit_log_attachment_name_exists">Name already used for another attachment</string>
+    <string name="edit_log_attachment_name_default">@string/attachment</string>
+
     <string name="edit_tag_item_name">@string/name</string>
     <string name="edit_tag_item_description">Description</string>
     <string name="edit_tag">@string/edit</string>
 
     <string name="error_tag_with_name_exists">Another tag with the same name already exists</string>
     <string name="error_should_not_be_empty">Should not be empty</string>
+    <string name="error_internal">Internal error</string>
+    <string name="error_io_in">Error reading file</string>
+    <string name="error_io_out">@string/error_internal</string>
+    <string name="error_attachment_too_big">Attachment too big!</string>
 
     <string name="edit_log_filter_name">@string/name</string>
     <string name="edit_log_filter_sort_order">"Sort order: "</string>
@@ -105,6 +121,12 @@
 
     <string name="log_list_tag_list_separator">@string/string_list_separator</string>
 
+
+    <!-- Filesize formats -->
+    <string name="filesize_b">%d B</string>
+    <string name="filesize_kib">%d KiB</string>
+    <string name="filesize_mib">%d MiB</string>
+    <string name="filesize_gib">%d GiB</string>
 
     <!-- Date formats defaults (SimpleDateFormat) -->
     <string name="date_format_overview_1">MMM y</string>
@@ -205,6 +227,8 @@
     <!-- General purpose strings to reference from more specific context -->
     <string name="about">About</string>
     <string name="add">Add</string>
+    <string name="attachment">Attachment</string>
+    <string name="attachments">Attachments</string>
     <string name="cancel">Cancel</string>
     <string name="content">Content</string>
     <string name="date">Date</string>
@@ -217,6 +241,8 @@
     <string name="more">More</string>
     <string name="name">Name</string>
     <string name="ok">OK</string>
+    <string name="rename">Rename</string>
+    <string name="preview">Preview</string>
     <string name="save">Save</string>
     <string name="search">Search</string>
     <string name="select_all">Select all</string>

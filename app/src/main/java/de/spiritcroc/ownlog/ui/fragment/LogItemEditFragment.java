@@ -26,7 +26,9 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.design.widget.BottomSheetBehavior;
 import android.support.v4.content.LocalBroadcastManager;
 import android.text.format.DateFormat;
 import android.util.Log;
@@ -38,6 +40,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.TimePicker;
@@ -71,6 +74,10 @@ public class LogItemEditFragment extends BaseFragment implements View.OnClickLis
     private static final String TAG = LogItemEditFragment.class.getSimpleName();
 
     // Saved instance state bundle keys
+    private static final String KEY_ADD_ITEM =
+            LogItemEditFragment.class.getName() + ".add_item";
+    private static final String KEY_TEMPORARY_EXISTENCE =
+            LogItemEditFragment.class.getName() + ".temporary_existence";
     private static final String KEY_INIT_TITLE =
             LogItemEditFragment.class.getName() + ".init_title";
     private static final String KEY_SET_TITLE =
@@ -90,11 +97,16 @@ public class LogItemEditFragment extends BaseFragment implements View.OnClickLis
     private static final String KEY_AVAILABLE_TAGS =
             LogItemEditFragment.class.getName() + ".available_tags";
 
+    private static final String FRAGMENT_TAG_ATTACHMENTS = TAG + ".attachments";
+
     // DB request codes
     private static final int DB_REQUEST_LOAD = 1;
     private static final int DB_REQUEST_SAVE = 2;
+    private static final int DB_REQUEST_SAVE_FOR_ATTACHMENTS = 3;
+    private static final int DB_REQUEST_DELETE = 4;
 
     private boolean mAddItem = true;
+    private boolean mTemporaryExistence = false;
     private long mEditItemId = -1;
 
     // Remember the initial values to check whether anything needs saving
@@ -111,6 +123,8 @@ public class LogItemEditFragment extends BaseFragment implements View.OnClickLis
     private EditText mEditLogTitle;
     private EditText mEditLogContent;
     private EditTagsView mEditTagsView;
+    private BottomSheetBehavior mBottomSheetBehavior;
+    private LogAttachmentsEditFragment mAttachmentsFragment;
 
     /**
      * @param logItem
@@ -133,7 +147,11 @@ public class LogItemEditFragment extends BaseFragment implements View.OnClickLis
         super.onCreate(savedInstanceState);
         setHasOptionsMenu(true);
 
-        if (getArguments() == null) {
+        if (savedInstanceState != null) {
+            mEditItemId = savedInstanceState.getLong(Constants.EXTRA_LOG_ITEM_ID, -1);
+            mAddItem = savedInstanceState.getBoolean(KEY_ADD_ITEM, mEditItemId == -1);
+            mTemporaryExistence = savedInstanceState.getBoolean(KEY_TEMPORARY_EXISTENCE, false);
+        } else if (getArguments() == null) {
             mAddItem = true;
         } else {
             mEditItemId = getArguments().getLong(Constants.EXTRA_LOG_ITEM_ID, -1);
@@ -154,6 +172,29 @@ public class LogItemEditFragment extends BaseFragment implements View.OnClickLis
         mEditLogTitle = (EditText) view.findViewById(R.id.title_edit);
         mEditLogContent = (EditText) view.findViewById(R.id.content_edit);
         mEditTagsView = (EditTagsView) view.findViewById(R.id.edit_tags_view);
+        View attachmentsStubView = view.findViewById(R.id.attachments_stub);
+        mBottomSheetBehavior = BottomSheetBehavior.from(attachmentsStubView);
+        mBottomSheetBehavior.setState(BottomSheetBehavior.STATE_HIDDEN);
+        mBottomSheetBehavior.setBottomSheetCallback(new BottomSheetBehavior.BottomSheetCallback() {
+            @Override
+            public void onStateChanged(@NonNull View bottomSheet, int newState) {
+                if (newState == BottomSheetBehavior.STATE_HIDDEN
+                        || newState == BottomSheetBehavior.STATE_COLLAPSED) {
+                    // Allow editing, no bottom sheet in the way
+                    mEditLogTitle.setFocusableInTouchMode(true);
+                    mEditLogContent.setFocusableInTouchMode(true);
+                    mEditLogTitle.setFocusable(true);
+                    mEditLogContent.setFocusable(true);
+                } else {
+                    // Don't allow editing covered text
+                    mEditLogTitle.setFocusable(false);
+                    mEditLogContent.setFocusable(false);
+                }
+            }
+            @Override
+            public void onSlide(@NonNull View bottomSheet, float slideOffset) {}
+        });
+
         mEditTagsView.setTagsProvider(this);
 
         mEditTime.setOnClickListener(this);
@@ -171,6 +212,20 @@ public class LogItemEditFragment extends BaseFragment implements View.OnClickLis
                 initValues();
             }
         }
+
+        if (savedInstanceState == null) {
+            mAttachmentsFragment = new LogAttachmentsEditFragment();
+            Bundle attachmentArgs = new Bundle();
+            attachmentArgs.putLong(Constants.EXTRA_LOG_ITEM_ID, mEditItemId);
+            mAttachmentsFragment.setArguments(attachmentArgs);
+            getFragmentManager().beginTransaction()
+                    .add(R.id.attachments_stub, mAttachmentsFragment, FRAGMENT_TAG_ATTACHMENTS)
+                    .commit();
+        } else {
+            mAttachmentsFragment = (LogAttachmentsEditFragment) getFragmentManager()
+                    .findFragmentByTag(FRAGMENT_TAG_ATTACHMENTS);
+        }
+
         return view;
     }
 
@@ -220,6 +275,8 @@ public class LogItemEditFragment extends BaseFragment implements View.OnClickLis
     @Override
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
+        outState.putBoolean(KEY_ADD_ITEM, mAddItem);
+        outState.putBoolean(KEY_TEMPORARY_EXISTENCE, mTemporaryExistence);
         outState.putString(KEY_INIT_TITLE, mInitTitle);
         outState.putString(KEY_SET_TITLE, mEditLogTitle.getText().toString());
         outState.putString(KEY_INIT_CONTENT, mInitContent);
@@ -247,6 +304,9 @@ public class LogItemEditFragment extends BaseFragment implements View.OnClickLis
         switch (item.getItemId()) {
             case R.id.action_save:
                 saveChanges();
+                return true;
+            case R.id.action_attachments:
+                toggleAttachments();
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
@@ -311,6 +371,36 @@ public class LogItemEditFragment extends BaseFragment implements View.OnClickLis
         }
     }
 
+    private void toggleAttachments() {
+        if (mBottomSheetBehavior.getState() != BottomSheetBehavior.STATE_EXPANDED) {
+            if (mAddItem) {
+                PasswdHelper.getWritableDatabase(getActivity(), this,
+                        DB_REQUEST_SAVE_FOR_ATTACHMENTS);
+            } else {
+                showAttachments();
+            }
+        } else {
+            hideAttachments();
+        }
+    }
+
+    private void showAttachments() {
+        // Hide keyboard
+        View view = getActivity().getCurrentFocus();
+        if (view != null) {
+            InputMethodManager imm = (InputMethodManager) getActivity()
+                    .getSystemService(Context.INPUT_METHOD_SERVICE);
+            if (imm != null) {
+                imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
+            }
+        }
+        mBottomSheetBehavior.setState(BottomSheetBehavior.STATE_EXPANDED);
+    }
+
+    private void hideAttachments() {
+        mBottomSheetBehavior.setState(BottomSheetBehavior.STATE_HIDDEN);
+    }
+
     private void saveChanges(SQLiteDatabase db) {
         ContentValues values = new ContentValues();
         values.put(DbContract.Log.COLUMN_TITLE, mEditLogTitle.getText().toString());
@@ -358,6 +448,54 @@ public class LogItemEditFragment extends BaseFragment implements View.OnClickLis
         );
     }
 
+    /**
+     * Attachments need to be saved immediately, so log entry needs to already exist.
+     * In case we're in add mode, add an empty entry and convert to edit mode
+     */
+    private void ensureExistence(SQLiteDatabase db) {
+        if (mAddItem) {
+            ContentValues values = new ContentValues();
+            values.put(DbContract.Log._ID, LogItem.generateId());
+            values.put(DbContract.Log.COLUMN_TITLE, "");
+            values.put(DbContract.Log.COLUMN_CONTENT, "");
+            values.put(DbContract.Log.COLUMN_TIME, mTime.getTimeInMillis());
+            values.put(DbContract.Log.COLUMN_TIME_END, System.currentTimeMillis());
+            mEditItemId = db.insert(DbContract.Log.TABLE, "null", values);
+            db.close();
+            mAddItem = false;
+            mTemporaryExistence = true;
+            mAttachmentsFragment.setLogId(mEditItemId);
+            // Notify about added/edited item
+            LocalBroadcastManager.getInstance(getActivity()).sendBroadcast(new Intent(
+                    Constants.EVENT_LOG_UPDATE).putExtra(Constants.EXTRA_LOG_ITEM_ID, mEditItemId));
+            // TODO invalidate options menu? currenlty both are the same either way though
+        } else {
+            db.close();
+        }
+    }
+
+    private void discardExistence() {
+        if (mTemporaryExistence && noChangesPresent() && !mAttachmentsFragment.hasAttachments()) {
+            PasswdHelper.getWritableDatabase(getActivity(), this, DB_REQUEST_DELETE);
+        } else {
+            finish();
+        }
+    }
+
+    private void deleteEntry(SQLiteDatabase db) {
+        String selection = DbContract.Log._ID + " = ?";
+        String[] selectionArgs = {String.valueOf(mEditItemId)};
+        db.delete(DbContract.Log.TABLE, selection, selectionArgs);
+        db.close();
+        finish();
+        // Notify about deleted item
+        LocalBroadcastManager.getInstance(getActivity()).sendBroadcast(
+                new Intent(Constants.EVENT_LOG_UPDATE)
+                        .putExtra(Constants.EXTRA_LOG_ITEM_ID, mEditItemId)
+        );
+        finish();
+    }
+
     @Override
     public void receiveWritableDatabase(SQLiteDatabase db, int requestId) {
         switch (requestId) {
@@ -366,6 +504,13 @@ public class LogItemEditFragment extends BaseFragment implements View.OnClickLis
                 break;
             case DB_REQUEST_SAVE:
                 saveChanges(db);
+                break;
+            case DB_REQUEST_SAVE_FOR_ATTACHMENTS:
+                ensureExistence(db);
+                showAttachments();
+                break;
+            case DB_REQUEST_DELETE:
+                deleteEntry(db);
                 break;
         }
     }
@@ -381,10 +526,12 @@ public class LogItemEditFragment extends BaseFragment implements View.OnClickLis
     }
 
     @Override
-    public boolean onUpOrBackPressed() {
-        if (noChangesPresent()) {
-            // Nothing changed, apply default behaviour
-            return super.onUpOrBackPressed();
+    public boolean onUpOrBackPressed(boolean backPress) {
+        if (backPress &&
+                mBottomSheetBehavior.getState() == BottomSheetBehavior.STATE_EXPANDED) {
+            mBottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
+        } else if (noChangesPresent()) {
+            discardExistence();
         } else {
             // User made some changes; make sure he gets what he wants after exiting the screen
             new AlertDialog.Builder(getActivity())
@@ -411,8 +558,8 @@ public class LogItemEditFragment extends BaseFragment implements View.OnClickLis
                                 }
                             })
                     .show();
-            return true;
         }
+        return true;
     }
 
     private boolean noChangesPresent() {

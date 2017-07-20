@@ -14,16 +14,14 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 -->
 
-<menu xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto">
-    <item
-        android:id="@+id/action_attachments"
-        android:title="@string/action_attachments"
-        android:icon="@drawable/ic_attachment"
-        app:showAsAction="ifRoom" />
-    <item
-        android:id="@+id/action_save"
-        android:title="@string/action_save"
-        android:icon="@drawable/ic_save"
-        app:showAsAction="always" />
-</menu>
+
+<android.support.v7.widget.RecyclerView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/attachments_container"
+    app:layoutManager="android.support.v7.widget.LinearLayoutManager"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:paddingBottom="@dimen/attachment_margin"
+    android:clipToPadding="false" />
+

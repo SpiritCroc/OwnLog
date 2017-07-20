@@ -386,6 +386,11 @@ public class LogFragment extends BaseFragment implements PasswdHelper.RequestDbL
         protected String getSortOrder() {
             return mLogFilters.get(mCurrentFilter).getSortOrder();
         }
+
+        @Override
+        protected boolean shouldCheckAttachments() {
+            return true;
+        }
     }
 
     private class LogArrayAdapter extends ArrayAdapter<LogItem> {
@@ -420,6 +425,7 @@ public class LogFragment extends BaseFragment implements PasswdHelper.RequestDbL
                 holder.date3 = (TextView) convertView.findViewById(R.id.date_3);
                 holder.title = (TextView) convertView.findViewById(R.id.title);
                 holder.tag = (TextView) convertView.findViewById(R.id.tag);
+                holder.attachment = convertView.findViewById(R.id.attachment);
 
                 convertView.setTag(holder);
             } else {
@@ -439,6 +445,7 @@ public class LogFragment extends BaseFragment implements PasswdHelper.RequestDbL
             holder.date3.setText(DateFormatter.getOverviewPart3(getContext(), item.time));
             holder.title.setText(TextUtils.isEmpty(item.title) ? item.content : item.title);
             holder.tag.setText(formatTags(item.tags));
+            holder.attachment.setVisibility(item.hasAttachments ? View.VISIBLE : View.GONE);
 
             convertView.setBackgroundColor(mSelectedItems.contains(position)
                     ? mItemSelectedBgColor
@@ -475,6 +482,7 @@ public class LogFragment extends BaseFragment implements PasswdHelper.RequestDbL
         TextView date3;
         TextView title;
         TextView tag;
+        View attachment;
     }
 
     private String formatTags(ArrayList<TagItem> tags) {

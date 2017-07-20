@@ -79,7 +79,7 @@ public class SingleFragmentActivity extends BaseActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case android.R.id.home:
-                if (!mFragment.onUpOrBackPressed()) {
+                if (!mFragment.onUpOrBackPressed(false)) {
                     finish();
                 }
                 return true;
@@ -90,7 +90,7 @@ public class SingleFragmentActivity extends BaseActivity {
 
     @Override
     public void onBackPressed() {
-        if (!mFragment.onUpOrBackPressed()) {
+        if (!mFragment.onUpOrBackPressed(true)) {
             super.onBackPressed();
         }
     }

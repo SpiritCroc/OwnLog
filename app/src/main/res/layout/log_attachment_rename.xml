@@ -14,16 +14,22 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 -->
 
-<menu xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto">
-    <item
-        android:id="@+id/action_attachments"
-        android:title="@string/action_attachments"
-        android:icon="@drawable/ic_attachment"
-        app:showAsAction="ifRoom" />
-    <item
-        android:id="@+id/action_save"
-        android:title="@string/action_save"
-        android:icon="@drawable/ic_save"
-        app:showAsAction="always" />
-</menu>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal">
+    <EditText
+        android:id="@+id/edit_name"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:inputType="text"
+        android:lines="1"/>
+    <TextView
+        android:id="@+id/show_file_extension"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginRight="@dimen/dialog_horizontal_padding"
+        android:lines="1"/>
+</LinearLayout>
