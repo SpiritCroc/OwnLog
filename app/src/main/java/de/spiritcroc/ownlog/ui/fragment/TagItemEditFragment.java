@@ -27,6 +27,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.content.LocalBroadcastManager;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
 import android.view.WindowManager;
@@ -338,7 +339,7 @@ public class TagItemEditFragment extends DialogFragment implements PasswdHelper.
 
     private boolean isNameValid(SQLiteDatabase db) {
         String name = mEditTagName.getText().toString();
-        if ("".equals(name)) {
+        if (TextUtils.isEmpty(name)) {
             mEditTagName.setError(getString(R.string.error_should_not_be_empty));
             return false;
         }
