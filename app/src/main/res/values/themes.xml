@@ -27,10 +27,13 @@
         <item name="textColorListDate3">#8a000000</item>
         <item name="textColorListTitle">#de000000</item>
         <item name="textColorListTag">#60000000</item>
-        <item name="backgroundColorListHeader">#fffafafa</item>
+        <item name="backgroundColorListHeader">?android:attr/colorBackground</item>
         <item name="backgroundColorListItem">@android:color/transparent</item>
         <item name="backgroundColorListItemSelected">#1e000000</item>
         <item name="backgroundColorEditTagView">#1e000000</item>
+
+        <!-- modify material drawer colors -->
+        <item name="material_drawer_background">?android:attr/colorBackground</item>
     </style>
 
     <style name="AppThemeDark" parent="MaterialDrawerTheme.ActionBar">
@@ -46,12 +49,13 @@
         <item name="textColorListDate3">#b3ffffff</item>
         <item name="textColorListTitle">#ffffffff</item>
         <item name="textColorListTag">#80ffffff</item>
-        <item name="backgroundColorListHeader">#ff303030</item>
+        <item name="backgroundColorListHeader">?android:attr/colorBackground</item>
         <item name="backgroundColorListItem">@android:color/transparent</item>
         <item name="backgroundColorListItemSelected">#33ffffff</item>
         <item name="backgroundColorEditTagView">#33ffffff</item>
 
         <!-- modify material drawer colors -->
+        <item name="material_drawer_background">?android:attr/colorBackground</item>
         <item name="material_drawer_selected">#ff424242</item>
     </style>
 
