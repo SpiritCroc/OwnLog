@@ -112,19 +112,24 @@ public class LogItem implements Parcelable, DateFormatter.DateProvider {
         public long logId;
         public String name;
         public String type;
+        /*
+        @Deprecated
         public byte[] data;
+        */
 
         /*
          * Empty constructor for LoadLogItemAttachmentsTask
          */
         Attachment() {}
 
-        public Attachment(long id, long logId, String name, String type, byte[] data) {
+        public Attachment(long id, long logId, String name, String type/*, byte[] data*/) {
             this.id = id;
             this.logId = logId;
             this.name = name;
             this.type = type;
+            /*
             this.data = data;
+            */
         }
 
         public static long generateId() {
@@ -140,7 +145,9 @@ public class LogItem implements Parcelable, DateFormatter.DateProvider {
         public void writeToParcel(Parcel out, int flags) {
             out.writeLongArray(new long[]{id, logId});
             out.writeStringArray(new String[]{name, type});
+            /*
             out.writeByteArray(data);
+            */
         }
 
         public static final Parcelable.Creator<Attachment> CREATOR
@@ -149,8 +156,8 @@ public class LogItem implements Parcelable, DateFormatter.DateProvider {
             public Attachment createFromParcel(Parcel in) {
                 long[] longs = in.createLongArray();
                 String[] strings = in.createStringArray();
-                return new Attachment(longs[0], longs[1], strings[0], strings[1],
-                        in.createByteArray());
+                return new Attachment(longs[0], longs[1], strings[0], strings[1]/*,
+                        in.createByteArray()*/);
             }
 
             @Override
@@ -161,8 +168,8 @@ public class LogItem implements Parcelable, DateFormatter.DateProvider {
 
         @Override
         public String toString() {
-            return getClass().getSimpleName() + " (" + id + ";" + logId + ";" + name + ";" + type
-                    + ";" + data.length + ")";
+            return getClass().getSimpleName() + " (" + id + ";" + logId + ";" + name + ";" + type/*
+                    + ";" + data.length*/ + ")";
         }
     }
 }

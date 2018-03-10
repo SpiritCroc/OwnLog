@@ -37,6 +37,7 @@ import android.widget.Toast;
 
 import net.sqlcipher.database.SQLiteDatabase;
 
+import java.io.File;
 import java.util.ArrayList;
 
 import de.spiritcroc.ownlog.Constants;
@@ -242,7 +243,7 @@ public class LogAttachmentsShowFragment extends Fragment
                             Log.e(TAG, "Attachment click at invalid position " + position
                                     + ", attachments count is " + mAttachments.size());
                         } else {
-                            new MyOpenFileTask().execute(mAttachments.get(position));
+                            openFile(mAttachments.get(position));
                         }
                     }
                 });
@@ -254,7 +255,7 @@ public class LogAttachmentsShowFragment extends Fragment
                             Log.e(TAG, "Attachment long click at invalid position " + position
                                     + ", attachments count is " + mAttachments.size());
                         } else {
-                            new MyShareFileTask().execute(mAttachments.get(position));
+                            shareFile(mAttachments.get(position));
                         }
                         return true;
                     }
@@ -282,53 +283,20 @@ public class LogAttachmentsShowFragment extends Fragment
 
     }
 
-    private abstract class MyAbstractShareFileTask extends FileHelper.ShareFileTask {
-        protected String mFileType;
-        @Override
-        protected Context getContext() {
-            return getActivity();
-        }
-        @Override
-        protected Uri doInBackground(LogItem.Attachment... attachments) {
-            if (attachments.length == 1) {
-                mFileType = attachments[0].type;
-            } // else: super will throw exception
-            return super.doInBackground(attachments);
-        }
-        @Override
-        protected void onPostExecute(Uri result) {
-            if (getActivity() == null) {
-                Log.w(TAG, "Discarding share file result: activity is null");
-                return;
-            }
-            if (DEBUG) Log.d(TAG, "ShareFileTask: result is " + result);
-            if (result == null) {
-                Toast.makeText(getActivity(), R.string.error_io_out, Toast.LENGTH_LONG).show();
-            } else {
-                launchIntent(result);
-            }
-        }
-        protected abstract void launchIntent(Uri uri);
+    private void shareFile(LogItem.Attachment attachment) {
+        Uri uri = FileHelper.getShareFile(getActivity(), attachment);
+        ShareCompat.IntentBuilder.from(getActivity())
+                .addStream(uri)
+                .setType(attachment.type)
+                .startChooser();
     }
 
-    private class MyShareFileTask extends MyAbstractShareFileTask {
-        @Override
-        protected void launchIntent(Uri uri) {
-            ShareCompat.IntentBuilder.from(getActivity())
-                    .addStream(uri)
-                    .setType(mFileType)
-                    .startChooser();
-        }
-    }
-
-    private class MyOpenFileTask extends MyAbstractShareFileTask {
-        @Override
-        protected void launchIntent(Uri uri) {
-            Intent intent = new Intent(Intent.ACTION_VIEW);
-            intent.setDataAndType(uri, mFileType);
-            intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-            startActivity(intent);
-        }
+    private void openFile(LogItem.Attachment attachment) {
+        Uri uri = FileHelper.getShareFile(getActivity(), attachment);
+        Intent intent = new Intent(Intent.ACTION_VIEW);
+        intent.setDataAndType(uri, attachment.type);
+        intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+        startActivity(intent);
     }
 
     protected boolean isAttachmentClickEnabled() {
@@ -343,8 +311,9 @@ public class LogAttachmentsShowFragment extends Fragment
 
     protected void onBindAttachmentViewHolder(AttachmentViewHolder holder, int position) {
         LogItem.Attachment attachment = mAttachments.get(position);
+        File attachmentFile = FileHelper.getAttachmentFile(getActivity(), attachment);
         holder.mNameTextView.setText(attachment.name);
-        holder.mSizeTextView.setText(Util.formatFileSize(getActivity(), attachment.data.length));
+        holder.mSizeTextView.setText(Util.formatFileSize(getActivity(), attachmentFile.length()));
         // Preview
         try {
             // TODO speed up using cache/async loading?
@@ -352,8 +321,7 @@ public class LogAttachmentsShowFragment extends Fragment
             // Check dimensions
             BitmapFactory.Options options = new BitmapFactory.Options();
             options.inJustDecodeBounds = true;
-            BitmapFactory.decodeByteArray(attachment.data, 0,
-                    attachment.data.length, options);
+            BitmapFactory.decodeFile(attachmentFile.getAbsolutePath(), options);
             if (options.outWidth != -1 && options.outHeight != -1) {
                 // Calculate inSampleSize
                 calculateInSampleSize(options);
@@ -361,8 +329,7 @@ public class LogAttachmentsShowFragment extends Fragment
                 // Load image
                 options.inJustDecodeBounds = false;
                 holder.mPreviewImageView.setImageBitmap(
-                        BitmapFactory.decodeByteArray(attachment.data, 0, attachment.data.length,
-                                options));
+                        BitmapFactory.decodeFile(attachmentFile.getAbsolutePath(), options));
                 holder.mPreviewImageView.setVisibility(View.VISIBLE);
             } else {
                 // Not an image

@@ -20,11 +20,13 @@ package de.spiritcroc.ownlog.ui.fragment;
 
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.app.Dialog;
 import android.content.ContentValues;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.provider.OpenableColumns;
 import android.text.TextUtils;
@@ -32,14 +34,20 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ProgressBar;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import net.sqlcipher.database.SQLiteDatabase;
 
 import java.io.BufferedInputStream;
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 
+import de.spiritcroc.ownlog.FileHelper;
 import de.spiritcroc.ownlog.PasswdHelper;
 import de.spiritcroc.ownlog.R;
 import de.spiritcroc.ownlog.data.DbContract;
@@ -269,11 +277,21 @@ public class LogAttachmentsEditFragment extends LogAttachmentsShowFragment
             Log.e(TAG, "editAttachment: nothing selected");
             return;
         }
-        ContentValues values = new ContentValues();
-        values.put(DbContract.LogAttachment.COLUMN_ATTACHMENT_NAME, mTmpAttachmentName);
-        String selection = DbContract.LogAttachment._ID + " = ?";
-        String[] selectionArgs = {String.valueOf(getAttachment(mRequestedAttachmentPosition).id)};
-        db.update(DbContract.LogAttachment.TABLE, values, selection, selectionArgs);
+        LogItem.Attachment attachment = getAttachment(mRequestedAttachmentPosition);
+        // Rename file
+        if (FileHelper.getAttachmentFile(getActivity(), attachment).renameTo(
+                FileHelper.getAttachmentFile(getActivity(), attachment.logId,
+                        mTmpAttachmentName))) {
+            // Rename file in database
+            ContentValues values = new ContentValues();
+            values.put(DbContract.LogAttachment2.COLUMN_ATTACHMENT_NAME, mTmpAttachmentName);
+            String selection = DbContract.LogAttachment2._ID + " = ?";
+            String[] selectionArgs = {String.valueOf(attachment.id)};
+            db.update(DbContract.LogAttachment2.TABLE, values, selection, selectionArgs);
+        } else {
+            Log.e(TAG, "Renaming attachment failed");
+            Toast.makeText(getActivity(), R.string.error_internal, Toast.LENGTH_LONG).show();
+        }
         db.close();
         mRenameFragment.verifyNameSet();
         mRequestedAttachmentPosition = ATTACHMENT_POSITION_NONE;
@@ -285,11 +303,16 @@ public class LogAttachmentsEditFragment extends LogAttachmentsShowFragment
             Log.e(TAG, "deleteAttachment: nothing selected");
             return;
         }
-        String selection = DbContract.LogAttachment._ID + " = ?";
-        db.delete(DbContract.LogAttachment.TABLE, selection,
-                new String[]{String.valueOf(getAttachment(mRequestedAttachmentPosition).id)});
+        // Remove from database
+        LogItem.Attachment attachment = getAttachment(mRequestedAttachmentPosition);
+        String selection = DbContract.LogAttachment2._ID + " = ?";
+        db.delete(DbContract.LogAttachment2.TABLE, selection,
+                new String[]{String.valueOf(attachment.id)});
         db.close();
         mRequestedAttachmentPosition = ATTACHMENT_POSITION_NONE;
+        // Remove from storage
+        FileHelper.getAttachmentFile(getActivity(), attachment).delete();
+        // Reload content
         loadContent();
     }
 
@@ -298,14 +321,14 @@ public class LogAttachmentsEditFragment extends LogAttachmentsShowFragment
                 mTmpAttachmentName.lastIndexOf('.') == 0) {
             return getString(R.string.error_should_not_be_empty);
         }
-        String shouldNotExist = DbContract.LogAttachment.COLUMN_ATTACHMENT_NAME
+        String shouldNotExist = DbContract.LogAttachment2.COLUMN_ATTACHMENT_NAME
                 + " = '" + mTmpAttachmentName + "'";
         if (mRequestedAttachmentPosition >= 0) {
-            shouldNotExist += " AND " + DbContract.LogAttachment._ID
+            shouldNotExist += " AND " + DbContract.LogAttachment2._ID
                     + " != " + getAttachment(mRequestedAttachmentPosition).id;
         }
         if (LoadLogItemAttachmentsTask.loadAttachments(db, shouldNotExist,
-                new String[]{DbContract.LogAttachment._ID},
+                new String[]{DbContract.LogAttachment2._ID},
                 LoadLogItemAttachmentsTask.getSortOrder()).isEmpty()) {
             return null;
         } else {
@@ -362,6 +385,55 @@ public class LogAttachmentsEditFragment extends LogAttachmentsShowFragment
         return name;
     }
 
+    private class AddAttachmentTask extends AsyncTask<Void, Void, Exception> {
+        private SQLiteDatabase mDb;
+        private Dialog mDialog;
+        public AddAttachmentTask(SQLiteDatabase db) {
+            mDb = db;
+        }
+        @Override
+        protected void onPreExecute() {
+            View progressView = getLayoutInflater().inflate(R.layout.dialog_progess_indeterminate,
+                    null);
+            TextView messageView = progressView.findViewById(R.id.progress_message);
+            messageView.setText(R.string.add_log_attachment_progress_message);
+            ProgressBar progressBar = new ProgressBar(getActivity(), null,
+                    android.R.style.Widget_ProgressBar_Horizontal);
+            progressBar.setIndeterminate(true);
+            mDialog = new AlertDialog.Builder(getActivity())
+                    .setCancelable(false)
+                    .setTitle(R.string.add_log_attachment_progress_title)
+                    .setView(progressView)
+                    .create();
+            mDialog.setCancelable(false);
+            mDialog.show();
+        }
+        @Override
+        protected Exception doInBackground(Void... nothing) {
+            try {
+                addAttachmentBg(mDb);
+            } catch (Exception e) {
+                return e;
+            }
+            return null;
+        }
+        @Override
+        protected void onPostExecute(Exception result) {
+            mDialog.dismiss();
+            if (result instanceof IOException) {
+                Toast.makeText(getActivity(), R.string.error_io_in, Toast.LENGTH_LONG).show();
+                result.printStackTrace();
+            } else if (result != null) {
+                Toast.makeText(getActivity(), R.string.error_internal, Toast.LENGTH_LONG).show();
+                result.printStackTrace();
+            } else {
+                mRenameFragment.verifyNameSet();
+                mRequestedAttachmentPosition = ATTACHMENT_POSITION_NONE;
+                loadContent();
+            }
+        }
+    }
+
     private void addAttachment(SQLiteDatabase db) {
         String errorMsg = getNameError(db);
         if (errorMsg != null) {
@@ -369,34 +441,39 @@ public class LogAttachmentsEditFragment extends LogAttachmentsShowFragment
             mRenameFragment.errorNameInvalid(errorMsg);
             return;
         }
+        new AddAttachmentTask(db).execute();
+    }
 
+    private void addAttachmentBg(SQLiteDatabase db) throws IOException {
         InputStream inputStream = null;
         BufferedInputStream in = null;
+        OutputStream out = null;
 
         String type = getActivity().getContentResolver().getType(mAddUri);
         if (DEBUG) Log.d(TAG, "Inserting file " + mTmpAttachmentName + " with type " + type);
         try {
+            // Copy file to app memory
             inputStream = getActivity().getContentResolver().openInputStream(mAddUri);
             if (inputStream == null) {
                 throw new IOException("Could not open inputStream from intent");
             }
             in = new BufferedInputStream(inputStream);
-            byte[] data = new byte[in.available()];
-            in.read(data);
+            File target = FileHelper.getAttachmentFile(getActivity(), getLogId(),
+                    mTmpAttachmentName);
+            out = new FileOutputStream(target);
+            byte[] data = new byte[1024];
+            int len;
+            while ((len = in.read(data)) > 0) {
+                out.write(data, 0, len);
+            }
+            // Update database
             ContentValues values = new ContentValues();
-            values.put(DbContract.LogAttachment._ID, LogItem.Attachment.generateId());
-            values.put(DbContract.LogAttachment.COLUMN_LOG, getLogId());
-            values.put(DbContract.LogAttachment.COLUMN_ATTACHMENT_NAME, mTmpAttachmentName);
-            values.put(DbContract.LogAttachment.COLUMN_ATTACHMENT_TYPE, type);
-            values.put(DbContract.LogAttachment.COLUMN_ATTACHMENT_DATA, data);
-            db.insert(DbContract.LogAttachment.TABLE, "null", values);
+            values.put(DbContract.LogAttachment2._ID, LogItem.Attachment.generateId());
+            values.put(DbContract.LogAttachment2.COLUMN_LOG, getLogId());
+            values.put(DbContract.LogAttachment2.COLUMN_ATTACHMENT_NAME, mTmpAttachmentName);
+            values.put(DbContract.LogAttachment2.COLUMN_ATTACHMENT_TYPE, type);
+            db.insert(DbContract.LogAttachment2.TABLE, "null", values);
             if (DEBUG) Log.d(TAG, "Inserted new attachment");
-        } catch (IOException e) {
-            Toast.makeText(getActivity(), R.string.error_io_in, Toast.LENGTH_LONG).show();
-            e.printStackTrace();
-        } catch (OutOfMemoryError e) {
-            Toast.makeText(getActivity(), R.string.error_attachment_too_big, Toast.LENGTH_LONG)
-                    .show();
         } finally {
             if (in != null) {
                 try {
@@ -412,11 +489,15 @@ public class LogAttachmentsEditFragment extends LogAttachmentsShowFragment
                     e.printStackTrace();
                 }
             }
+            if (out != null) {
+                try {
+                    out.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
             db.close();
         }
-        mRenameFragment.verifyNameSet();
-        mRequestedAttachmentPosition = ATTACHMENT_POSITION_NONE;
-        loadContent();
     }
 
     @Override

@@ -29,7 +29,7 @@ public final class Util {
     // No instantiation wanted
     private Util() {}
 
-    public static String formatFileSize(Context context, int size) {
+    public static String formatFileSize(Context context, long size) {
         if (size > FILESIZE_GIB) {
             return context.getString(R.string.filesize_gib, size/FILESIZE_GIB);
         } else if (size > FILESIZE_MIB) {

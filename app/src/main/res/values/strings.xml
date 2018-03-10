@@ -96,6 +96,8 @@
     <string name="edit_log_attachment_delete">@string/delete</string>
     <string name="edit_log_attachment_name_exists">Name already used for another attachment</string>
     <string name="edit_log_attachment_name_default">@string/attachment</string>
+    <string name="add_log_attachment_progress_title">Adding attachment</string>
+    <string name="add_log_attachment_progress_message">Copying file to app storage, this might take a while depending on the file size</string>
 
     <string name="edit_tag_item_name">@string/name</string>
     <string name="edit_tag_item_description">Description</string>
@@ -106,7 +108,6 @@
     <string name="error_internal">Internal error</string>
     <string name="error_io_in">Error reading file</string>
     <string name="error_io_out">@string/error_internal</string>
-    <string name="error_attachment_too_big">Attachment too big!</string>
 
     <string name="edit_log_filter_name">@string/name</string>
     <string name="edit_log_filter_sort_order">"Sort order: "</string>

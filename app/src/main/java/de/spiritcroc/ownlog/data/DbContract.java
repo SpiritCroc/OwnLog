@@ -30,12 +30,22 @@ public abstract class DbContract {
         public static final String COLUMN_CONTENT = "content";
     }
 
+    /*
+    @Deprecated
     public static abstract class LogAttachment implements BaseColumns {
         public static final String TABLE = "log_blobs";
         public static final String COLUMN_LOG = "log_id";
         public static final String COLUMN_ATTACHMENT_NAME = "attachment_name";
         public static final String COLUMN_ATTACHMENT_TYPE = "attachment_type";
         public static final String COLUMN_ATTACHMENT_DATA = "attachment_data";
+    }
+    */
+
+    public static abstract class LogAttachment2 implements BaseColumns {
+        public static final String TABLE = "log_files";
+        public static final String COLUMN_LOG = "log_id";
+        public static final String COLUMN_ATTACHMENT_NAME = "attachment_name";
+        public static final String COLUMN_ATTACHMENT_TYPE = "attachment_type";
     }
 
     public static abstract class Tag implements BaseColumns {

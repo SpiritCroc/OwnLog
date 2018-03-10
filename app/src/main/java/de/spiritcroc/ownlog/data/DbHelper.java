@@ -37,7 +37,7 @@ public class DbHelper extends SQLiteOpenHelper {
 
     private static boolean INITIALIZED = false;
 
-    public static final int VERSION = 5;
+    public static final int VERSION = 6;
     public static final String NAME = "log.db";
     public static final String NAME_COPY = "log2.db";
     private static final String NAME_BACKUP = "log_backup.db";
@@ -70,6 +70,8 @@ public class DbHelper extends SQLiteOpenHelper {
             DbContract.Log.COLUMN_TITLE + TEXT + COMMA_SEP +
             DbContract.Log.COLUMN_CONTENT + TEXT + " )";
 
+    /*
+    @Deprecated
     private static final String SQL_CREATE_LOG_ATTACHMENT =
             CREATE_TABLE + DbContract.LogAttachment.TABLE + "(" +
                     DbContract.LogAttachment._ID + INTEGER + PRIMARY_KEY + COMMA_SEP +
@@ -81,6 +83,19 @@ public class DbHelper extends SQLiteOpenHelper {
                     DbContract.LogAttachment.COLUMN_ATTACHMENT_DATA + BLOB + COMMA_SEP +
                     UNIQUE + " (" + DbContract.LogAttachment.COLUMN_LOG + COMMA_SEP +
                             DbContract.LogAttachment.COLUMN_ATTACHMENT_NAME + ")" +
+                                    ON_CONFLICT + FAIL + ")";
+    */
+
+    private static final String SQL_CREATE_LOG_ATTACHMENT2 =
+            CREATE_TABLE + DbContract.LogAttachment2.TABLE + "(" +
+                    DbContract.LogAttachment2._ID + INTEGER + PRIMARY_KEY + COMMA_SEP +
+                    DbContract.LogAttachment2.COLUMN_LOG + INTEGER + NOT_NULL + REFERENCES +
+                            DbContract.Log.TABLE + "(" + DbContract.Log._ID + ")" +
+                                    ON_DELETE + CASCADE + COMMA_SEP +
+                    DbContract.LogAttachment2.COLUMN_ATTACHMENT_NAME + TEXT + COMMA_SEP +
+                    DbContract.LogAttachment2.COLUMN_ATTACHMENT_TYPE + TEXT + COMMA_SEP +
+                    UNIQUE + " (" + DbContract.LogAttachment2.COLUMN_LOG + COMMA_SEP +
+                            DbContract.LogAttachment2.COLUMN_ATTACHMENT_NAME + ")" +
                                     ON_CONFLICT + FAIL + ")";
 
     private static final String SQL_CREATE_TAG =
@@ -140,7 +155,7 @@ public class DbHelper extends SQLiteOpenHelper {
     @Override
     public void onCreate(SQLiteDatabase db) {
         db.execSQL(SQL_CREATE_LOG);
-        db.execSQL(SQL_CREATE_LOG_ATTACHMENT);
+        db.execSQL(SQL_CREATE_LOG_ATTACHMENT2);
         db.execSQL(SQL_CREATE_TAG);
         db.execSQL(SQL_CREATE_LOG_TAGS);
         db.execSQL(SQL_CREATE_LOG_FILTER);
@@ -163,9 +178,19 @@ public class DbHelper extends SQLiteOpenHelper {
                 db.execSQL("alter table " + DbContract.LogFilter_Tags.TABLE + " add " +
                         DbContract.LogFilter_Tags.COLUMN_EXCLUDE_TAG + BOOLEAN + NOT_NULL + DEFAULT + "FALSE");
             case 4:
+                /* Internal release
                 // Create Attachment table
                 db.execSQL(SQL_CREATE_LOG_ATTACHMENT);
-                break; // Remember to keep a break before default!
+                */
+            case 5:
+                /* Internal release
+                // Move to newer attachment implementation
+                db.execSQL(DROP_TABLE + DbContract.LogAttachment.TABLE);
+                */
+                db.execSQL(SQL_CREATE_LOG_ATTACHMENT2);
+
+                // Remember to keep break before default!
+                break;
             default:
                 Log.e(TAG, "unhandled upgrade from " + oldVersion + " to " +
                         newVersion + "; discarding content");
@@ -186,7 +211,7 @@ public class DbHelper extends SQLiteOpenHelper {
 
     private void recreateDb(SQLiteDatabase db) {
         db.execSQL(DROP_TABLE + DbContract.Log.TABLE);
-        db.execSQL(DROP_TABLE + DbContract.LogAttachment.TABLE);
+        db.execSQL(DROP_TABLE + DbContract.LogAttachment2.TABLE);
         db.execSQL(DROP_TABLE + DbContract.Tag.TABLE);
         db.execSQL(DROP_TABLE + DbContract.LogTags.TABLE);
         db.execSQL(DROP_TABLE + DbContract.LogFilter.TABLE);

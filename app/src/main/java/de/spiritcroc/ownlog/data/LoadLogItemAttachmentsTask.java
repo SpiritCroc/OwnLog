@@ -47,9 +47,9 @@ public class LoadLogItemAttachmentsTask
             // Load all attachments
             return null;
         } else {
-            String selection = DbContract.LogAttachment.COLUMN_LOG + " = " + ids[0];
+            String selection = DbContract.LogAttachment2.COLUMN_LOG + " = " + ids[0];
             for (int i = 1; i < ids.length; i++) {
-                selection += " OR " + DbContract.LogAttachment.COLUMN_LOG + " = " + ids[1];
+                selection += " OR " + DbContract.LogAttachment2.COLUMN_LOG + " = " + ids[1];
             }
             return selection;
         }
@@ -57,16 +57,15 @@ public class LoadLogItemAttachmentsTask
 
     protected String[] getProjection() {
         return new String[] {
-                DbContract.LogAttachment._ID,
-                DbContract.LogAttachment.COLUMN_LOG,
-                DbContract.LogAttachment.COLUMN_ATTACHMENT_NAME,
-                DbContract.LogAttachment.COLUMN_ATTACHMENT_TYPE,
-                DbContract.LogAttachment.COLUMN_ATTACHMENT_DATA,
+                DbContract.LogAttachment2._ID,
+                DbContract.LogAttachment2.COLUMN_LOG,
+                DbContract.LogAttachment2.COLUMN_ATTACHMENT_NAME,
+                DbContract.LogAttachment2.COLUMN_ATTACHMENT_TYPE,
         };
     }
 
     public static String getSortOrder() {
-        return  DbContract.LogAttachment.COLUMN_ATTACHMENT_NAME + " ASC";
+        return  DbContract.LogAttachment2.COLUMN_ATTACHMENT_NAME + " ASC";
     }
 
     /**
@@ -75,18 +74,17 @@ public class LoadLogItemAttachmentsTask
     public static ArrayList<LogItem.Attachment> loadAttachments(SQLiteDatabase db, String selection,
                                                                 String[] projection,
                                                                 String sortOrder) {
-        Cursor cursor = db.query(DbContract.LogAttachment.TABLE, projection,
+        Cursor cursor = db.query(DbContract.LogAttachment2.TABLE, projection,
                 selection, null, null, null, sortOrder);
         ArrayList<LogItem.Attachment> result = new ArrayList<>();
         if (!cursor.moveToFirst()) {
             cursor.close();
             return result;
         }
-        int indexId = cursor.getColumnIndex(DbContract.LogAttachment._ID);
-        int indexLogId = cursor.getColumnIndex(DbContract.LogAttachment.COLUMN_LOG);
-        int indexName = cursor.getColumnIndex(DbContract.LogAttachment.COLUMN_ATTACHMENT_NAME);
-        int indexType = cursor.getColumnIndex(DbContract.LogAttachment.COLUMN_ATTACHMENT_TYPE);
-        int indexData = cursor.getColumnIndex(DbContract.LogAttachment.COLUMN_ATTACHMENT_DATA);
+        int indexId = cursor.getColumnIndex(DbContract.LogAttachment2._ID);
+        int indexLogId = cursor.getColumnIndex(DbContract.LogAttachment2.COLUMN_LOG);
+        int indexName = cursor.getColumnIndex(DbContract.LogAttachment2.COLUMN_ATTACHMENT_NAME);
+        int indexType = cursor.getColumnIndex(DbContract.LogAttachment2.COLUMN_ATTACHMENT_TYPE);
         do {
             LogItem.Attachment item = new LogItem.Attachment();
             if (indexId >= 0) {
@@ -101,9 +99,6 @@ public class LoadLogItemAttachmentsTask
             if (indexType >= 0) {
                 item.type = cursor.getString(indexType);
             }
-            if (indexData >= 0) {
-                item.data = cursor.getBlob(indexData);
-            }
             result.add(item);
         } while (cursor.moveToNext());
         cursor.close();
@@ -114,9 +109,9 @@ public class LoadLogItemAttachmentsTask
      * Does not close db, do so from calling method!
      */
     public static boolean hasAttachments(SQLiteDatabase db, long logId) {
-        Cursor cursor = db.query(DbContract.LogAttachment.TABLE,
-                new String[]{DbContract.LogAttachment._ID},
-                DbContract.LogAttachment.COLUMN_LOG + " = " + logId,
+        Cursor cursor = db.query(DbContract.LogAttachment2.TABLE,
+                new String[]{DbContract.LogAttachment2._ID},
+                DbContract.LogAttachment2.COLUMN_LOG + " = " + logId,
                 null, null, null, null
         );
         boolean result = cursor.getCount() > 0;
