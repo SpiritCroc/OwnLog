@@ -58,7 +58,7 @@
         <item name="android:minHeight">18dp</item>
     </style>
 
-    <style name="AddAttachmentButton" parent="Base.Widget.AppCompat.Button.Borderless">
+    <style name="AddAttachmentButton">
         <item name="android:minWidth">18dp</item>
         <item name="android:minHeight">18dp</item>
     </style>
@@ -100,7 +100,7 @@
     </style>
 
     <style name="AttachmentsActionBar">
-        <item name="android:background">?attr/backgroundColorPeekActionBar</item>
+        <item name="android:background">@drawable/background_attachments_action_bar</item>
         <item name="android:elevation">2dp</item>
     </style>
 

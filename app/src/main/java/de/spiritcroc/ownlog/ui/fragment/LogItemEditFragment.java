@@ -393,8 +393,17 @@ public class LogItemEditFragment extends BaseFragment implements View.OnClickLis
             if (imm != null) {
                 imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
             }
+            // If we don't delay this, bottom sheet might position itself over the
+            // former keyboard position, which is then gone
+            view.postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    mBottomSheetBehavior.setState(BottomSheetBehavior.STATE_EXPANDED);
+                }
+            }, 200);
+        } else {
+            mBottomSheetBehavior.setState(BottomSheetBehavior.STATE_EXPANDED);
         }
-        mBottomSheetBehavior.setState(BottomSheetBehavior.STATE_EXPANDED);
     }
 
     private void hideAttachments() {

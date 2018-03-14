@@ -43,6 +43,8 @@
     <dimen name="dialog_horizontal_padding">8dp</dimen>
     <dimen name="dialog_top_padding">4dp</dimen>
 
+    <dimen name="attachments_action_bar_vertical_padding">16dp</dimen>
+
     <dimen name="attachments_peek_height">50sp</dimen>
     <dimen name="attachments_peek_space_height">@dimen/attachments_peek_height</dimen>
     <dimen name="attachments_title_height">@dimen/attachments_peek_height</dimen>

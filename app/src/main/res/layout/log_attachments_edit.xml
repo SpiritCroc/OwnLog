@@ -26,9 +26,21 @@
         layout="@layout/log_attachments_title" />
 
     <LinearLayout
+        android:id="@+id/add_attachment_button"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:theme="@style/AttachmentsActionBar">
+        android:theme="@style/AttachmentsActionBar"
+        android:paddingTop="@dimen/attachments_action_bar_vertical_padding"
+        android:paddingBottom="@dimen/attachments_action_bar_vertical_padding">
+        <ImageView
+            android:src="@drawable/ic_add_small"
+            android:theme="@style/AddAttachmentButton"
+            android:layout_gravity="end"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:paddingStart="@dimen/attachment_padding"
+            android:elevation="0dp"
+            android:contentDescription="@string/edit_log_attachments_add" />
         <TextView
             android:text="@string/edit_log_attachments_add"
             android:layout_width="wrap_content"
@@ -36,19 +48,8 @@
             android:layout_gravity="center_vertical|start"
             android:gravity="center_vertical|start"
             android:paddingStart="@dimen/attachment_padding"
-            android:paddingTop="@dimen/attachment_padding"
-            android:paddingBottom="@dimen/attachment_padding"
             android:lines="1"
             android:elevation="0dp"/>
-        <ImageView
-            android:id="@+id/add_attachment_button"
-            android:src="@drawable/ic_add_small"
-            android:theme="@style/AddAttachmentButton"
-            android:layout_gravity="end"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:elevation="0dp"
-            android:contentDescription="@string/edit_log_attachments_add" />
     </LinearLayout>
 
     <include
