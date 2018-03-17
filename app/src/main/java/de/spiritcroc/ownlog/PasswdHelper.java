@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2017 SpiritCroc
+ * Copyright (C) 2017-2018 SpiritCroc
  * Email: spiritcroc@gmail.com
  *
  * This program is free software: you can redistribute it and/or modify
@@ -20,6 +20,7 @@ package de.spiritcroc.ownlog;
 
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.app.FragmentManager;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.util.Log;
@@ -35,6 +36,8 @@ import de.spiritcroc.ownlog.ui.fragment.RequestPasswordDialog;
 public class PasswdHelper {
 
     private static final String TAG = PasswdHelper.class.getSimpleName();
+
+    private static final String REQUEST_DB_DIALOG_FRAGMENT_TAG = "RequestPasswordDialog";
 
     private static String passwd = "";
 
@@ -73,8 +76,14 @@ public class PasswdHelper {
             listener.receiveWritableDatabase(db, requestId);
             return true;
         } else if (newRequest) {
-            new RequestPasswordDialog().init(listener, requestId)
-                    .show(activity.getFragmentManager(), "RequestPasswordDialog");
+            FragmentManager fragmentManager = activity.getFragmentManager();
+            RequestPasswordDialog requestPasswordDialog = (RequestPasswordDialog) fragmentManager
+                    .findFragmentByTag(REQUEST_DB_DIALOG_FRAGMENT_TAG);
+            if (requestPasswordDialog == null) {
+                requestPasswordDialog = new RequestPasswordDialog();
+                requestPasswordDialog.show(fragmentManager, REQUEST_DB_DIALOG_FRAGMENT_TAG);
+            }
+            requestPasswordDialog.addRequest(listener, requestId);
         }
         return false;
     }
