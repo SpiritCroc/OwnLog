@@ -225,6 +225,12 @@ public class LogItemEditFragment extends BaseFragment implements View.OnClickLis
             mAttachmentsFragment = (LogAttachmentsEditFragment) getFragmentManager()
                     .findFragmentByTag(FRAGMENT_TAG_ATTACHMENTS);
         }
+        mAttachmentsFragment.setTitleOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                mBottomSheetBehavior.setState(BottomSheetBehavior.STATE_HIDDEN);
+            }
+        });
 
         return view;
     }
