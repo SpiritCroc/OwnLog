@@ -19,7 +19,9 @@
 package de.spiritcroc.ownlog;
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.util.Log;
 
 import net.sqlcipher.database.SQLiteDatabase;
@@ -41,14 +43,31 @@ public class PasswdHelper {
         return getWritableDatabase(activity, listener, requestId, true);
     }
 
-    private static boolean getWritableDatabase(Activity activity, RequestDbListener listener,
-                                           int requestId, boolean newRequest) {
+    private static boolean getWritableDatabase(final Activity activity, RequestDbListener listener,
+                                               int requestId, boolean newRequest) {
         DbHelper dbHelper = new DbHelper(activity);
         SQLiteDatabase db = null;
         try {
             db = dbHelper.getWritableDatabase(passwd);
         } catch (SQLiteException e) {
             e.printStackTrace();
+        } catch (DbHelper.UnsupportedUpgradeException e) {
+            // Unsupported db version: notify user and close app
+            new AlertDialog.Builder(activity)
+                    .setTitle(R.string.error_upgrade_title)
+                    .setMessage(e.newVersion < e.oldVersion
+                            ? R.string.error_downgrade_summary
+                            : R.string.error_upgrade_summary)
+                    .setCancelable(false)
+                    .setPositiveButton(R.string.dialog_ok, new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            activity.finish();
+                        }
+                    })
+                    .show();
+            // Not a password error
+            return true;
         }
         if (db != null) {
             listener.receiveWritableDatabase(db, requestId);
@@ -61,7 +80,7 @@ public class PasswdHelper {
     }
 
     public static boolean getWritableDatabase(Activity activity, RequestDbListener listener,
-                                           int requestId, String newPasswd, boolean newRequest) {
+                                              int requestId, String newPasswd, boolean newRequest) {
         passwd = newPasswd;
         return getWritableDatabase(activity, listener, requestId, newRequest);
     }
@@ -94,11 +113,6 @@ public class PasswdHelper {
             Log.e(TAG, "setPasswd: old password denied by database");
             return;
         }
-
-        // Delete backup-ed db if it exists, since it won't have the same password as this one,
-        // which would lead either to problems when trying to restore; or possibly even a
-        // security concern
-        DbHelper.deleteBackup(context);
 
         if ("".equals(oldPasswd) || "".equals(newPasswd)) {
             // Add/remove decryption: simple changePassword() call is not enough,

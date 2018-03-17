@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2017 SpiritCroc
+ * Copyright (C) 2017-2018 SpiritCroc
  * Email: spiritcroc@gmail.com
  *
  * This program is free software: you can redistribute it and/or modify
@@ -25,12 +25,6 @@ import android.util.Log;
 import net.sqlcipher.database.SQLiteDatabase;
 import net.sqlcipher.database.SQLiteOpenHelper;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-
 public class DbHelper extends SQLiteOpenHelper {
 
     private static final String TAG = DbHelper.class.getSimpleName();
@@ -40,6 +34,7 @@ public class DbHelper extends SQLiteOpenHelper {
     public static final int VERSION = 6;
     public static final String NAME = "log.db";
     public static final String NAME_COPY = "log2.db";
+    @Deprecated
     private static final String NAME_BACKUP = "log_backup.db";
 
     private static final String TEXT = " TEXT";
@@ -192,11 +187,8 @@ public class DbHelper extends SQLiteOpenHelper {
                 // Remember to keep break before default!
                 break;
             default:
-                Log.e(TAG, "unhandled upgrade from " + oldVersion + " to " +
-                        newVersion + "; discarding content");
-                createBackup(mContext);
-                recreateDb(db);
-                break;
+                Log.e(TAG, "unhandled upgrade from " + oldVersion + " to " + newVersion);
+                throw new UnsupportedUpgradeException(oldVersion, newVersion);
         }
     }
 
@@ -209,45 +201,13 @@ public class DbHelper extends SQLiteOpenHelper {
         }
     }
 
-    private void recreateDb(SQLiteDatabase db) {
-        db.execSQL(DROP_TABLE + DbContract.Log.TABLE);
-        db.execSQL(DROP_TABLE + DbContract.LogAttachment2.TABLE);
-        db.execSQL(DROP_TABLE + DbContract.Tag.TABLE);
-        db.execSQL(DROP_TABLE + DbContract.LogTags.TABLE);
-        db.execSQL(DROP_TABLE + DbContract.LogFilter.TABLE);
-        db.execSQL(DROP_TABLE + DbContract.LogFilter_Tags.TABLE);
-        onCreate(db);
-    }
+    public class UnsupportedUpgradeException extends RuntimeException {
+        public final int oldVersion;
+        public final int newVersion;
 
-    public static void createBackup(Context context) {
-        deleteBackup(context);
-
-        File dbFile = context.getDatabasePath(DbHelper.NAME);
-        File dbBackupFile = context.getDatabasePath(DbHelper.NAME_BACKUP);
-        InputStream inputStream = null;
-        FileOutputStream outputStream = null;
-
-        try {
-            inputStream = new FileInputStream(dbFile);
-            outputStream = new FileOutputStream(dbBackupFile, false);
-            byte[] buffer = new byte[1024];
-            int length;
-            while ((length = inputStream.read(buffer)) > 0) {
-                outputStream.write(buffer, 0, length);
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        } finally {
-            try {
-                if (inputStream != null) inputStream.close();
-                if (outputStream != null) outputStream.close();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+        public UnsupportedUpgradeException(int oldVersion, int newVersion) {
+            this.oldVersion = oldVersion;
+            this.newVersion = newVersion;
         }
-    }
-
-    public static void deleteBackup(Context context) {
-        context.getDatabasePath(DbHelper.NAME_BACKUP).delete();
     }
 }

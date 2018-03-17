@@ -108,6 +108,9 @@
     <string name="error_internal">Internal error</string>
     <string name="error_io_in">Error reading file</string>
     <string name="error_io_out">@string/error_internal</string>
+    <string name="error_upgrade_title">Upgrade failure</string>
+    <string name="error_upgrade_summary">It seems you are coming from an unsupported version of this app. Please upgrade this app, or clear its app data (you will lose all your logs, settings etc. this way).</string>
+    <string name="error_downgrade_summary">It seems you are coming from a newer version of this app. Please upgrade this app, or clear its app data (you will lose all your logs, settings etc. this way).</string>
 
     <string name="edit_log_filter_name">@string/name</string>
     <string name="edit_log_filter_sort_order">"Sort order: "</string>
