@@ -22,11 +22,15 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.support.annotation.Nullable;
 
-import java.util.ArrayList;
 import java.util.List;
 
+import de.spiritcroc.ownlog.Util;
+
 public class TagItem implements Parcelable {
-    public long id;
+
+    public static final long ID_NONE = -1;
+
+    public long id = ID_NONE;
     public String name;
     public String description;
 
@@ -46,45 +50,12 @@ public class TagItem implements Parcelable {
     }
 
     /**
-     *
-     * @param origin
-     * Will be considered as old state for the diff
-     * @param modify
-     * Will be considered as new state for the diff
-     * @param addedItems
-     * Will include all items that were added in modify in comparison to origin after execution
-     * @param removedItems
-     * Will include all items that were removed in modiry in comparison to origin after execution
-     * @return
-     * True if content identical
+     * See Util.checkListDiff
      */
     public static boolean checkTagListDiff(List<TagItem> origin, List<TagItem> modify,
                                            @Nullable List<TagItem> addedItems,
                                            @Nullable List<TagItem> removedItems) {
-        if (addedItems == null) {
-            addedItems = new ArrayList<>();
-        } else {
-            addedItems.clear();
-        }
-        if (removedItems == null) {
-            removedItems = new ArrayList<>();
-        } else {
-            removedItems.clear();
-        }
-
-        for (TagItem o: origin) {
-            if (!modify.contains(o)) {
-                removedItems.add(o);
-            }
-        }
-
-        for (TagItem m: modify) {
-            if (!origin.contains(m)) {
-                addedItems.add(m);
-            }
-        }
-
-        return addedItems.isEmpty() && removedItems.isEmpty();
+        return Util.checkListDiff(origin, modify, addedItems, removedItems);
     }
 
     public static String getSortOrder() {

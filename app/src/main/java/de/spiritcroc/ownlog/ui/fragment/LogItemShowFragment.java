@@ -45,6 +45,7 @@ import de.spiritcroc.ownlog.DateFormatter;
 import de.spiritcroc.ownlog.PasswdHelper;
 import de.spiritcroc.ownlog.R;
 import de.spiritcroc.ownlog.data.DbContract;
+import de.spiritcroc.ownlog.data.DbHelper;
 import de.spiritcroc.ownlog.data.LoadLogItemsTask;
 import de.spiritcroc.ownlog.data.LogItem;
 import de.spiritcroc.ownlog.data.TagItem;
@@ -333,9 +334,7 @@ public class LogItemShowFragment extends BaseFragment implements PasswdHelper.Re
     }
 
     private void deleteEntry(SQLiteDatabase db) {
-        String selection = DbContract.Log._ID + " = ?";
-        String[] selectionArgs = {String.valueOf(mItemId)};
-        db.delete(DbContract.Log.TABLE, selection, selectionArgs);
+        DbHelper.removeLogItemsFromDb(getActivity(), db, new LogItem(mItemId));
         db.close();
         finish();
         // Notify about deleted item

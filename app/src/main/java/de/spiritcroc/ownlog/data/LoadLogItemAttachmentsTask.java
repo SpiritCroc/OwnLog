@@ -42,7 +42,7 @@ public class LoadLogItemAttachmentsTask
         return result;
     }
 
-    protected String getSelection(Long... ids) {
+    public static String getSelectionFromLogIds(Long... ids) {
         if (ids.length == 0) {
             // Load all attachments
             return null;
@@ -55,13 +55,21 @@ public class LoadLogItemAttachmentsTask
         }
     }
 
-    protected String[] getProjection() {
+    protected String getSelection(Long... logIds) {
+        return getSelectionFromLogIds(logIds);
+    }
+
+    public static String[] getFullProjection() {
         return new String[] {
                 DbContract.LogAttachment2._ID,
                 DbContract.LogAttachment2.COLUMN_LOG,
                 DbContract.LogAttachment2.COLUMN_ATTACHMENT_NAME,
                 DbContract.LogAttachment2.COLUMN_ATTACHMENT_TYPE,
         };
+    }
+
+    protected String[] getProjection() {
+        return getFullProjection();
     }
 
     public static String getSortOrder() {

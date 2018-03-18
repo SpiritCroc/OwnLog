@@ -203,9 +203,9 @@
     <string name="date">Datum</string>
     <string name="delete">Löschen</string>
     <string name="discard">Verwerfen</string>
-    <string name="edit">Bearbeiten</string>
     <string name="easteregg">Semmelknödel</string>
     <string name="easteregg_1">NÖÖT NÖÖT!</string>
+    <string name="edit">Bearbeiten</string>
     <string name="filters">Filter</string>
     <string name="more">Mehr</string>
     <string name="name">Name</string>

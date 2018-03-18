@@ -19,7 +19,6 @@
 package de.spiritcroc.ownlog.ui.fragment;
 
 import android.app.Fragment;
-import android.content.Context;
 import android.content.Intent;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
@@ -33,7 +32,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import net.sqlcipher.database.SQLiteDatabase;
 
@@ -284,7 +282,7 @@ public class LogAttachmentsShowFragment extends Fragment
     }
 
     private void shareFile(LogItem.Attachment attachment) {
-        Uri uri = FileHelper.getShareFile(getActivity(), attachment);
+        Uri uri = FileHelper.getAttachmentFileShare(getActivity(), attachment);
         ShareCompat.IntentBuilder.from(getActivity())
                 .addStream(uri)
                 .setType(attachment.type)
@@ -292,7 +290,7 @@ public class LogAttachmentsShowFragment extends Fragment
     }
 
     private void openFile(LogItem.Attachment attachment) {
-        Uri uri = FileHelper.getShareFile(getActivity(), attachment);
+        Uri uri = FileHelper.getAttachmentFileShare(getActivity(), attachment);
         Intent intent = new Intent(Intent.ACTION_VIEW);
         intent.setDataAndType(uri, attachment.type);
         intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);

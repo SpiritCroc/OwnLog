@@ -29,12 +29,12 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.provider.OpenableColumns;
+import android.support.v4.content.LocalBroadcastManager;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -47,10 +47,12 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 
+import de.spiritcroc.ownlog.Constants;
 import de.spiritcroc.ownlog.FileHelper;
 import de.spiritcroc.ownlog.PasswdHelper;
 import de.spiritcroc.ownlog.R;
 import de.spiritcroc.ownlog.data.DbContract;
+import de.spiritcroc.ownlog.data.DbHelper;
 import de.spiritcroc.ownlog.data.LoadLogItemAttachmentsTask;
 import de.spiritcroc.ownlog.data.LogItem;
 
@@ -283,11 +285,8 @@ public class LogAttachmentsEditFragment extends LogAttachmentsShowFragment
                 FileHelper.getAttachmentFile(getActivity(), attachment.logId,
                         mTmpAttachmentName))) {
             // Rename file in database
-            ContentValues values = new ContentValues();
-            values.put(DbContract.LogAttachment2.COLUMN_ATTACHMENT_NAME, mTmpAttachmentName);
-            String selection = DbContract.LogAttachment2._ID + " = ?";
-            String[] selectionArgs = {String.valueOf(attachment.id)};
-            db.update(DbContract.LogAttachment2.TABLE, values, selection, selectionArgs);
+            attachment.name = mTmpAttachmentName;
+            DbHelper.renameLogAttachmentDbEntry(db, attachment);
         } else {
             Log.e(TAG, "Renaming attachment failed");
             Toast.makeText(getActivity(), R.string.error_internal, Toast.LENGTH_LONG).show();
@@ -305,15 +304,18 @@ public class LogAttachmentsEditFragment extends LogAttachmentsShowFragment
         }
         // Remove from database
         LogItem.Attachment attachment = getAttachment(mRequestedAttachmentPosition);
-        String selection = DbContract.LogAttachment2._ID + " = ?";
-        db.delete(DbContract.LogAttachment2.TABLE, selection,
-                new String[]{String.valueOf(attachment.id)});
+        DbHelper.deleteLogAttachmentDbEntry(db, attachment);
         db.close();
         mRequestedAttachmentPosition = ATTACHMENT_POSITION_NONE;
         // Remove from storage
         FileHelper.getAttachmentFile(getActivity(), attachment).delete();
         // Reload content
         loadContent();
+        // Notify about updated log item (attachment status in overview)
+        LocalBroadcastManager.getInstance(getActivity()).sendBroadcast(
+                new Intent(Constants.EVENT_LOG_UPDATE).putExtra(Constants.EXTRA_LOG_ITEM_ID,
+                        getLogId())
+        );
     }
 
     private String getNameError(SQLiteDatabase db) {
@@ -397,9 +399,6 @@ public class LogAttachmentsEditFragment extends LogAttachmentsShowFragment
                     null);
             TextView messageView = progressView.findViewById(R.id.progress_message);
             messageView.setText(R.string.add_log_attachment_progress_message);
-            ProgressBar progressBar = new ProgressBar(getActivity(), null,
-                    android.R.style.Widget_ProgressBar_Horizontal);
-            progressBar.setIndeterminate(true);
             mDialog = new AlertDialog.Builder(getActivity())
                     .setCancelable(false)
                     .setTitle(R.string.add_log_attachment_progress_title)
@@ -430,6 +429,11 @@ public class LogAttachmentsEditFragment extends LogAttachmentsShowFragment
                 mRenameFragment.verifyNameSet();
                 mRequestedAttachmentPosition = ATTACHMENT_POSITION_NONE;
                 loadContent();
+                // Notify about updated log item (attachment status in overview)
+                LocalBroadcastManager.getInstance(getActivity()).sendBroadcast(
+                        new Intent(Constants.EVENT_LOG_UPDATE).putExtra(Constants.EXTRA_LOG_ITEM_ID,
+                                getLogId())
+                );
             }
         }
     }
@@ -467,12 +471,9 @@ public class LogAttachmentsEditFragment extends LogAttachmentsShowFragment
                 out.write(data, 0, len);
             }
             // Update database
-            ContentValues values = new ContentValues();
-            values.put(DbContract.LogAttachment2._ID, LogItem.Attachment.generateId());
-            values.put(DbContract.LogAttachment2.COLUMN_LOG, getLogId());
-            values.put(DbContract.LogAttachment2.COLUMN_ATTACHMENT_NAME, mTmpAttachmentName);
-            values.put(DbContract.LogAttachment2.COLUMN_ATTACHMENT_TYPE, type);
-            db.insert(DbContract.LogAttachment2.TABLE, "null", values);
+            LogItem.Attachment attachment = new LogItem.Attachment(LogItem.Attachment.generateId(),
+                    getLogId(), mTmpAttachmentName, type);
+            DbHelper.addLogAttachmentDbEntry(db, attachment);
             if (DEBUG) Log.d(TAG, "Inserted new attachment");
         } finally {
             if (in != null) {

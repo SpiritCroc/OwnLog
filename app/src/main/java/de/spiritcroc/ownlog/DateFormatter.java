@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2017 SpiritCroc
+ * Copyright (C) 2017-2018 SpiritCroc
  * Email: spiritcroc@gmail.com
  *
  * This program is free software: you can redistribute it and/or modify
@@ -21,6 +21,7 @@ package de.spiritcroc.ownlog;
 import android.content.Context;
 import android.support.annotation.StringRes;
 
+import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -67,7 +68,7 @@ public class DateFormatter {
         }
     }
 
-    private static String getDate(long millis, SimpleDateFormat format) {
+    private static String getDate(long millis, DateFormat format) {
         Calendar c = Calendar.getInstance();
         c.setTimeInMillis(millis);
         return format.format(c.getTime());
@@ -93,5 +94,9 @@ public class DateFormatter {
 
     public interface DateProvider {
         long getDate();
+    }
+
+    public static String getAutoDateFormatted(long millis) {
+        return getDate(millis, SimpleDateFormat.getDateInstance());
     }
 }

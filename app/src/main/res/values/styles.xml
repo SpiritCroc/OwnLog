@@ -42,6 +42,11 @@
         <item name="android:textColor">?attr/textColorListTag</item>
     </style>
 
+    <style name="LogListText.Status" parent="">
+        <item name="android:textSize">@dimen/text_size_small</item>
+        <item name="android:textColor">?attr/textColorStatus</item>
+    </style>
+
     <style name="LogListIcon.Attachment" parent="">
         <item name="android:paddingLeft">4dp</item>
         <item name="android:paddingRight">4dp</item>

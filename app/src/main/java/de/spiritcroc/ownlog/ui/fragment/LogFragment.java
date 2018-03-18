@@ -57,12 +57,12 @@ import de.spiritcroc.ownlog.DateFormatter;
 import de.spiritcroc.ownlog.PasswdHelper;
 import de.spiritcroc.ownlog.R;
 import de.spiritcroc.ownlog.Settings;
-import de.spiritcroc.ownlog.data.DbContract;
+import de.spiritcroc.ownlog.TagFormatter;
+import de.spiritcroc.ownlog.data.DbHelper;
 import de.spiritcroc.ownlog.data.LoadLogFiltersTask;
 import de.spiritcroc.ownlog.data.LoadLogItemsTask;
 import de.spiritcroc.ownlog.data.LogFilter;
 import de.spiritcroc.ownlog.data.LogItem;
-import de.spiritcroc.ownlog.data.TagItem;
 import de.spiritcroc.ownlog.ui.LogFilterProvider;
 import de.spiritcroc.ownlog.ui.LogFilterSelector;
 
@@ -444,7 +444,7 @@ public class LogFragment extends BaseFragment implements PasswdHelper.RequestDbL
             holder.date2.setText(TextUtils.isEmpty(date2text) ? date2text : (date2text + " "));
             holder.date3.setText(DateFormatter.getOverviewPart3(getContext(), item.time));
             holder.title.setText(TextUtils.isEmpty(item.title) ? item.content : item.title);
-            holder.tag.setText(formatTags(item.tags));
+            holder.tag.setText(TagFormatter.formatTags(getResources(), item.tags));
             holder.attachment.setVisibility(item.hasAttachments ? View.VISIBLE : View.GONE);
 
             convertView.setBackgroundColor(mSelectedItems.contains(position)
@@ -483,17 +483,6 @@ public class LogFragment extends BaseFragment implements PasswdHelper.RequestDbL
         TextView title;
         TextView tag;
         View attachment;
-    }
-
-    private String formatTags(ArrayList<TagItem> tags) {
-        if (tags == null || tags.isEmpty()) {
-            return "";
-        }
-        String result = tags.get(0).name;
-        for (int i = 1; i < tags.size(); i++) {
-            result += getString(R.string.log_list_tag_list_separator) + tags.get(1).name;
-        }
-        return result;
     }
 
 
@@ -593,14 +582,11 @@ public class LogFragment extends BaseFragment implements PasswdHelper.RequestDbL
             Log.e(TAG, "deleteSelection: selection is empty");
             return;
         }
-        String selection = DbContract.Log._ID + " = ?";
-        String[] selectionArgs = new String[mSelectedItems.size()];
-        selectionArgs[0] = String.valueOf(mItems.get(mSelectedItems.get(0)).id);
-        for (int i = 1; i < mSelectedItems.size(); i++) {
-            selection += " OR " + DbContract.Log._ID + " = ?";
-            selectionArgs[i] = String.valueOf(mItems.get(mSelectedItems.get(i)).id);
+        LogItem[] itemsToRemove = new LogItem[mSelectedItems.size()];
+        for (int i = 0; i < itemsToRemove.length; i++) {
+            itemsToRemove[i] = mItems.get(mSelectedItems.get(i));
         }
-        db.delete(DbContract.Log.TABLE, selection, selectionArgs);
+        DbHelper.removeLogItemsFromDb(getActivity(), db, itemsToRemove);
         db.close();
         // Notify about deleted items
         Intent notifyIntent = new Intent(Constants.EVENT_LOG_UPDATE);

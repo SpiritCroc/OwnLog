@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-    Copyright (C) 2017 SpiritCroc
+    Copyright (C) 2017-2018 SpiritCroc
     Email: spiritcroc@gmail.com
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -26,6 +26,7 @@
     <string name="title_tag_item_edit">Edit tag</string>
     <string name="title_log_filter_add">Add filter</string>
     <string name="title_log_filter_edit">Edit filter</string>
+    <string name="title_import_log">Import selection</string>
 
     <string name="action_add">@string/add</string>
     <string name="action_attachments">@string/attachments</string>
@@ -35,12 +36,17 @@
     <string name="action_search">@string/search</string>
     <string name="action_select_all">@string/select_all</string>
     <string name="action_tag">@string/tags</string>
+    <string name="action_strategy">@string/strategy</string>
+    <string name="action_import">@string/import1</string>
 
     <string name="drawer_filters">@string/filters</string>
     <string name="drawer_add_filter">Add filter&#8230;</string>
     <string name="drawer_more">@string/more</string>
     <string name="drawer_settings">@string/settings</string>
     <string name="drawer_about">@string/about</string>
+    <string name="drawer_data_management">Data management</string>
+    <string name="drawer_export">@string/export</string>
+    <string name="drawer_import">@string/import1</string>
 
     <plurals name="action_mode_selected_items">
         <item quantity="other">%d selected</item>
@@ -111,6 +117,8 @@
     <string name="error_upgrade_title">Upgrade failure</string>
     <string name="error_upgrade_summary">It seems you are coming from an unsupported version of this app. Please upgrade this app, or clear its app data (you will lose all your logs, settings etc. this way).</string>
     <string name="error_downgrade_summary">It seems you are coming from a newer version of this app. Please upgrade this app, or clear its app data (you will lose all your logs, settings etc. this way).</string>
+    <string name="error_import_failure_title">Import failed</string>
+    <string name="error_import_failure_message">The backup cannot be read! Maybe it was generated with a later version of this app, or tampered with.</string>
 
     <string name="edit_log_filter_name">@string/name</string>
     <string name="edit_log_filter_sort_order">"Sort order: "</string>
@@ -124,6 +132,43 @@
     <string name="edit_log_filter_sort_order_date_end_descending">Last edited first</string>
 
     <string name="log_list_tag_list_separator">@string/string_list_separator</string>
+
+
+    <string name="export_file_name" translatable="false">ownlog_%s.owloba</string>
+    <string name="export_file_path_pattern">.*\\.owloba</string>
+    <string name="export_file_date_format" translatable="false">yyyy-MM-dd_HHmm</string>
+    <string name="export_file_db" translatable="false">db</string>
+    <string name="export_file_attachments" translatable="false">attachments</string>
+    <string name="export_dialog_title">Export logs</string>
+    <string name="export_dialog_message">This will create a backup of all your logs.\nMake sure you have an app installed to share or save the resulting file (e.g. an email application or a file explorer with \"save as\"-functionality)</string>
+    <string name="export_dialog_progress_message">Creating backup</string>
+
+    <string name="import_file_dir" translatable="false">importing</string>
+    <string name="import_file_db" translatable="false">db</string>
+    <string name="import_file_attachments" translatable="false">attachments</string>
+    <string name="import_read_message">Reading backup, this might take a while</string>
+    <string name="import_compare_message">Evaluating backup</string>
+    <string name="import_import_message">Importing backup</string>
+    <string name="import_successful">Import successful</string>
+    <string name="import_failure">Import failed</string>
+    <string name="import_dialog_request_password">Backup requires password</string>
+    <string name="import_change_status_new">New</string>
+    <string name="import_change_status_deprecated">Older than local version</string>
+    <string name="import_change_status_updated">Updated</string>
+    <string name="import_change_status_changed">Changed</string>
+    <string name="import_change_status_same">Matches local version</string>
+    <string name="import_change_tags_status_updated">More tags than local version</string>
+    <string name="import_change_tags_status_deprecated">Less tags than local version</string>
+    <string name="import_change_tags_status_changed">Tags differ</string>
+    <string name="import_change_attachment_status_updated">More attachments than local version</string>
+    <string name="import_change_attachment_status_deprecated">Less attachments than local version</string>
+    <string name="import_change_attachment_status_changed">Attachments differ</string>
+    <string name="import_strategy_latest">Import if backup is newer</string>
+    <string name="import_strategy_overwrite">Overwrite conflicting local entries</string>
+    <string name="import_strategy_if_new">Keep conflicting local entries</string>
+    <string name="import_dialog_strategy_title">Select default import strategy</string>
+    <string name="import_dialog_title">Import backup</string>
+    <string name="import_dialog_message">Depending on your selection, this might overwrite local log entries. Continue?</string>
 
 
     <!-- Filesize formats -->
@@ -238,10 +283,12 @@
     <string name="date">Date</string>
     <string name="delete">Delete</string>
     <string name="discard">Discard</string>
-    <string name="edit">Edit</string>
     <string name="easteregg">Semmelknödel</string>
     <string name="easteregg_1">NOOT NOOT!</string>
+    <string name="edit">Edit</string>
+    <string name="export">Export</string>
     <string name="filters">Filters</string>
+    <string name="import1">Import</string>
     <string name="more">More</string>
     <string name="name">Name</string>
     <string name="ok">OK</string>
@@ -251,6 +298,7 @@
     <string name="search">Search</string>
     <string name="select_all">Select all</string>
     <string name="settings">Settings</string>
+    <string name="strategy">Strategy</string>
     <string name="string_list_separator">", "</string>
     <string name="tags">Tags</string>
     <string name="title">Title</string>

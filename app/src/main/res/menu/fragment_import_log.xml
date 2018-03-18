@@ -14,23 +14,16 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 -->
 
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="vertical"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent">
-
-    <ProgressBar
-        android:id="@+id/progress_bar"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:indeterminate="true"
-        style="@style/Widget.AppCompat.ProgressBar.Horizontal"/>
-
-    <TextView
-        android:id="@+id/progress_message"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:padding="?attr/dialogPreferredPadding"
-        style="@android:style/TextAppearance.Material.Subhead"/>
-
-</LinearLayout>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    <item
+        android:id="@+id/action_import"
+        android:title="@string/action_import"
+        android:icon="@drawable/ic_import"
+        app:showAsAction="ifRoom" />
+    <item
+        android:id="@+id/action_strategy"
+        android:title="@string/action_strategy"
+        android:icon="@drawable/ic_strategy"
+        app:showAsAction="ifRoom"/>
+</menu>

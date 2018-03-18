@@ -35,12 +35,57 @@ public abstract class LoadLogItemsTask extends AsyncTask<Void, Void, ArrayList<L
 
     @Override
     protected ArrayList<LogItem> doInBackground(Void... params) {
-        Cursor cursor = mDb.query(DbContract.Log.TABLE, getProjection(), getSelection(), null, null,
-                null, getSortOrder());
+        ArrayList<LogItem> result = loadLogItems(mDb, getSelection(), getProjection(),
+                getSortOrder(), shouldLoadTags(), shouldCheckAttachments());
+        if (doInBackgroundClosesDb()) {
+            mDb.close();
+        }
+        return result;
+    }
+
+    protected String getSelection() {
+        return null;
+    }
+
+    protected String[] getProjection() {
+        return getFullProjection();
+    }
+
+    public static String[] getFullProjection() {
+        return new String[] {
+                DbContract.Log._ID,
+                DbContract.Log.COLUMN_TIME,
+                DbContract.Log.COLUMN_TIME_END,
+                DbContract.Log.COLUMN_TITLE,
+                DbContract.Log.COLUMN_CONTENT,
+        };
+    }
+
+    protected String getSortOrder() {
+        return  LogFilter.DEFAULT_SORT_ORDER;
+    }
+
+    protected boolean shouldLoadTags() {
+        return true;
+    }
+
+    protected boolean shouldCheckAttachments() {
+        return false;
+    }
+
+    protected boolean doInBackgroundClosesDb() {
+        return true;
+    }
+
+    public static ArrayList<LogItem> loadLogItems(SQLiteDatabase db, String selection,
+                                                  String[] projection, String sortOrder,
+                                                  boolean shouldLoadTags,
+                                                  boolean shouldCheckAttachments) {
+        Cursor cursor = db.query(DbContract.Log.TABLE, projection, selection, null, null,
+                null, sortOrder);
         ArrayList<LogItem> result = new ArrayList<>();
         if (!cursor.moveToFirst()) {
             cursor.close();
-            mDb.close();
             return result;
         }
         int indexId = cursor.getColumnIndex(DbContract.Log._ID);
@@ -65,7 +110,7 @@ public abstract class LoadLogItemsTask extends AsyncTask<Void, Void, ArrayList<L
             if (indexContent >= 0) {
                 item.content = cursor.getString(indexContent);
             }
-            if (shouldLoadTags()) {
+            if (shouldLoadTags) {
                 String tagTable =
                         DbContract.LogTags.TABLE + " AS lt JOIN "
                                 + DbContract.Tag.TABLE + " AS t ON lt."
@@ -76,7 +121,7 @@ public abstract class LoadLogItemsTask extends AsyncTask<Void, Void, ArrayList<L
                         "t." + DbContract.Tag.COLUMN_DESCRIPTION + " AS mDescription",
                 };
                 String tagSelection = "lt." + DbContract.LogTags.COLUMN_LOG + " = " + item.id;
-                Cursor tagCursor = mDb.query(tagTable, tagProjection, tagSelection, null, null,
+                Cursor tagCursor = db.query(tagTable, tagProjection, tagSelection, null, null,
                         null, TagItem.getSortOrder());
                 int tagIndexId = tagCursor.getColumnIndex("mId");
                 int tagIndexName = tagCursor.getColumnIndex("mName");
@@ -99,39 +144,12 @@ public abstract class LoadLogItemsTask extends AsyncTask<Void, Void, ArrayList<L
                 }
                 tagCursor.close();
             }
-            if (shouldCheckAttachments()) {
-                item.hasAttachments = LoadLogItemAttachmentsTask.hasAttachments(mDb, item.id);
+            if (shouldCheckAttachments) {
+                item.hasAttachments = LoadLogItemAttachmentsTask.hasAttachments(db, item.id);
             }
             result.add(item);
         } while (cursor.moveToNext());
         cursor.close();
-        mDb.close();
         return result;
-    }
-
-    protected String getSelection() {
-        return null;
-    }
-
-    protected String[] getProjection() {
-        return new String[] {
-                DbContract.Log._ID,
-                DbContract.Log.COLUMN_TIME,
-                DbContract.Log.COLUMN_TIME_END,
-                DbContract.Log.COLUMN_TITLE,
-                DbContract.Log.COLUMN_CONTENT,
-        };
-    }
-
-    protected String getSortOrder() {
-        return  LogFilter.DEFAULT_SORT_ORDER;
-    }
-
-    protected boolean shouldLoadTags() {
-        return true;
-    }
-
-    protected boolean shouldCheckAttachments() {
-        return false;
     }
 }

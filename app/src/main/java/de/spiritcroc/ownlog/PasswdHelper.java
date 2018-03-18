@@ -146,6 +146,19 @@ public class PasswdHelper {
         passwd = newPasswd;
     }
 
+    public static void cloneDb(SQLiteDatabase db, File outFile) {
+        String exportPasswd = passwd;
+        outFile.delete();
+        SQLiteDatabase dbCopy = SQLiteDatabase.openOrCreateDatabase(outFile, exportPasswd, null);
+        dbCopy.setVersion(DbHelper.VERSION);
+        db.rawExecSQL("PRAGMA key = \'" + passwd + "\';");
+        db.rawExecSQL("ATTACH DATABASE \'" + outFile +
+                "\' AS encrypted KEY \'" + exportPasswd + "\';");
+        db.rawExecSQL("SELECT sqlcipher_export(\'encrypted\');");
+        db.rawExecSQL("DETACH DATABASE encrypted;");
+        db.close();
+    }
+
     public interface RequestDbListener {
         void receiveWritableDatabase(SQLiteDatabase db, int requestId);
     }

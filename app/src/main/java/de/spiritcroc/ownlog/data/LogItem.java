@@ -26,7 +26,10 @@ import java.util.ArrayList;
 import de.spiritcroc.ownlog.DateFormatter;
 
 public class LogItem implements Parcelable, DateFormatter.DateProvider {
-    public long id = -1;
+
+    public final static long ID_NONE = -1;
+
+    public long id = ID_NONE;
     public long time = -1;
     public long timeEnd = -1;
     public String title = "";
@@ -73,6 +76,22 @@ public class LogItem implements Parcelable, DateFormatter.DateProvider {
         }
     }
 
+    /**
+     * Alternative to equals to actually compare content instead of id only.
+     * Does not take into account tags and attachments
+     */
+    public boolean differs(LogItem item) {
+        return item.id != this.id ||
+                item.time != this.time ||
+                item.timeEnd != this.timeEnd ||
+                !item.title.equals(this.title) ||
+                !item.content.equals(this.content);
+    }
+
+    public boolean newerThan(LogItem item) {
+        return this.timeEnd > item.timeEnd;
+    }
+
     @Override
     public int describeContents() {
         return 0;
@@ -108,7 +127,10 @@ public class LogItem implements Parcelable, DateFormatter.DateProvider {
     };
 
     public static class Attachment implements Parcelable {
-        public long id;
+
+        public final static long ID_NONE = -1;
+
+        public long id = ID_NONE;
         public long logId;
         public String name;
         public String type;
@@ -130,6 +152,18 @@ public class LogItem implements Parcelable, DateFormatter.DateProvider {
             /*
             this.data = data;
             */
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (o == this) {
+                return true;
+            } else if (o instanceof Attachment) {
+                Attachment compare = (Attachment) o;
+                return id != -1 && id == compare.id;
+            } else {
+                return false;
+            }
         }
 
         public static long generateId() {

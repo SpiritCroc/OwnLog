@@ -27,6 +27,7 @@
         <item name="textColorListDate3">#8a000000</item>
         <item name="textColorListTitle">#de000000</item>
         <item name="textColorListTag">#60000000</item>
+        <item name="textColorStatus">#60000000</item>
         <item name="foregroundColorListAttachment">#60000000</item>
         <item name="backgroundColorListHeader">?android:attr/colorBackground</item>
         <item name="backgroundColorListItem">@android:color/transparent</item>
@@ -54,6 +55,7 @@
         <item name="textColorListDate3">#b3ffffff</item>
         <item name="textColorListTitle">#ffffffff</item>
         <item name="textColorListTag">#80ffffff</item>
+        <item name="textColorStatus">#80ffffff</item>
         <item name="foregroundColorListAttachment">#80ffffff</item>
         <item name="backgroundColorListHeader">?android:attr/colorBackground</item>
         <item name="backgroundColorListItem">@android:color/transparent</item>

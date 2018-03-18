@@ -59,6 +59,7 @@ import de.spiritcroc.ownlog.PasswdHelper;
 import de.spiritcroc.ownlog.R;
 import de.spiritcroc.ownlog.Settings;
 import de.spiritcroc.ownlog.data.DbContract;
+import de.spiritcroc.ownlog.data.DbHelper;
 import de.spiritcroc.ownlog.data.LoadLogItemsTask;
 import de.spiritcroc.ownlog.data.LoadTagItemsTask;
 import de.spiritcroc.ownlog.data.LogItem;
@@ -107,7 +108,7 @@ public class LogItemEditFragment extends BaseFragment implements View.OnClickLis
 
     private boolean mAddItem = true;
     private boolean mTemporaryExistence = false;
-    private long mEditItemId = -1;
+    private long mEditItemId = LogItem.ID_NONE;
 
     // Remember the initial values to check whether anything needs saving
     private long mInitTime = System.currentTimeMillis();
@@ -417,49 +418,23 @@ public class LogItemEditFragment extends BaseFragment implements View.OnClickLis
     }
 
     private void saveChanges(SQLiteDatabase db) {
-        ContentValues values = new ContentValues();
-        values.put(DbContract.Log.COLUMN_TITLE, mEditLogTitle.getText().toString());
-        values.put(DbContract.Log.COLUMN_CONTENT, mEditLogContent.getText().toString());
-        values.put(DbContract.Log.COLUMN_TIME, mTime.getTimeInMillis());
-        values.put(DbContract.Log.COLUMN_TIME_END, System.currentTimeMillis());
-        long id;
-        if (mAddItem) {
-            values.put(DbContract.Log._ID, LogItem.generateId());
-            id = db.insert(DbContract.Log.TABLE, "null", values);
-        } else {
-            id = mEditItemId;
-            String selection = DbContract.Log._ID + " = ?";
-            String[] selectionArgs = {String.valueOf(id)};
-            db.update(DbContract.Log.TABLE, values, selection, selectionArgs);
-        }
-        // Tags
+        LogItem logItem = new LogItem(mEditItemId,
+                mTime.getTimeInMillis(),
+                0,// Timestamp updated while saving
+                mEditLogTitle.getText().toString(),
+                mEditLogContent.getText().toString()
+        );
+        logItem.id = DbHelper.saveLogItemToDb(logItem, db, mAddItem, false);
         ArrayList<TagItem> addedTags = new ArrayList<>();
         ArrayList<TagItem> removedTags = new ArrayList<>();
         TagItem.checkTagListDiff(mInitTags, mSetTags, addedTags, removedTags);
-        for (TagItem tag: addedTags) {
-            ContentValues tagValues = new ContentValues();
-            tagValues.put(DbContract.LogTags.COLUMN_LOG, id);
-            tagValues.put(DbContract.LogTags.COLUMN_TAG, tag.id);
-            db.insert(DbContract.LogTags.TABLE, "null", tagValues);
-        }
-        if (!removedTags.isEmpty()) {
-            String selection = DbContract.LogTags.COLUMN_LOG + " = ? AND ("
-                    + DbContract.LogTags.COLUMN_TAG + " = ?";
-            String[] selectionArgs = new String[removedTags.size()+1];
-            selectionArgs[0] = String.valueOf(id);
-            selectionArgs[1] = String.valueOf(removedTags.get(0).id);
-            for (int i = 1; i < removedTags.size(); i++) {
-                selection += " OR " + DbContract.LogTags.COLUMN_TAG + " = ?";
-                selectionArgs[i+1] = String.valueOf(removedTags.get(i).id);
-            }
-            selection += ")";
-            db.delete(DbContract.LogTags.TABLE, selection, selectionArgs);
-        }
+        DbHelper.saveLogTagsToDb(logItem, db, addedTags, removedTags);
         db.close();
         finish();
         // Notify about added/edited item
         LocalBroadcastManager.getInstance(getActivity()).sendBroadcast(
-                new Intent(Constants.EVENT_LOG_UPDATE).putExtra(Constants.EXTRA_LOG_ITEM_ID, id)
+                new Intent(Constants.EVENT_LOG_UPDATE).putExtra(Constants.EXTRA_LOG_ITEM_ID,
+                        logItem.id)
         );
     }
 
@@ -469,13 +444,12 @@ public class LogItemEditFragment extends BaseFragment implements View.OnClickLis
      */
     private void ensureExistence(SQLiteDatabase db) {
         if (mAddItem) {
-            ContentValues values = new ContentValues();
-            values.put(DbContract.Log._ID, LogItem.generateId());
-            values.put(DbContract.Log.COLUMN_TITLE, "");
-            values.put(DbContract.Log.COLUMN_CONTENT, "");
-            values.put(DbContract.Log.COLUMN_TIME, mTime.getTimeInMillis());
-            values.put(DbContract.Log.COLUMN_TIME_END, System.currentTimeMillis());
-            mEditItemId = db.insert(DbContract.Log.TABLE, "null", values);
+            LogItem logItem = new LogItem(LogItem.generateId(),
+                    mTime.getTimeInMillis(),
+                    0,// Timestamp updated while saving
+                    "", ""
+            );
+            mEditItemId = DbHelper.saveLogItemToDb(logItem, db, mAddItem, false);
             db.close();
             mAddItem = false;
             mTemporaryExistence = true;
@@ -498,11 +472,8 @@ public class LogItemEditFragment extends BaseFragment implements View.OnClickLis
     }
 
     private void deleteEntry(SQLiteDatabase db) {
-        String selection = DbContract.Log._ID + " = ?";
-        String[] selectionArgs = {String.valueOf(mEditItemId)};
-        db.delete(DbContract.Log.TABLE, selection, selectionArgs);
+        DbHelper.removeLogItemsFromDb(getActivity(), db, new LogItem(mEditItemId));
         db.close();
-        finish();
         // Notify about deleted item
         LocalBroadcastManager.getInstance(getActivity()).sendBroadcast(
                 new Intent(Constants.EVENT_LOG_UPDATE)
