@@ -119,6 +119,7 @@
     <string name="error_downgrade_summary">It seems you are coming from a newer version of this app. Please upgrade this app, or clear its app data (you will lose all your logs, settings etc. this way).</string>
     <string name="error_import_failure_title">Import failed</string>
     <string name="error_import_failure_message">The backup cannot be read! Maybe it was generated with a later version of this app, or tampered with.</string>
+    <string name="error_permission_denied_read_external_storage">Missing permission to read external storage</string>
 
     <string name="edit_log_filter_name">@string/name</string>
     <string name="edit_log_filter_sort_order">"Sort order: "</string>

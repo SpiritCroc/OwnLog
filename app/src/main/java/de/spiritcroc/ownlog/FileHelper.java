@@ -18,8 +18,13 @@
 
 package de.spiritcroc.ownlog;
 
+import android.Manifest;
+import android.app.Activity;
 import android.content.Context;
+import android.content.pm.PackageManager;
 import android.net.Uri;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.content.FileProvider;
 import android.util.Log;
 
@@ -52,6 +57,25 @@ public abstract class FileHelper {
     private static final String FILE_PROVIDER_AUTHORITY = "de.spiritcroc.ownlog.fileprovider";
 
     private static final int FILE_BUFFER = 2048;
+
+
+    /**
+     * @param requestCode
+     * The request code ID that should be checked for in onRequestPermissionsResult by the caller
+     * @return
+     * True if all permissions already granted, false if they have to get granted first
+     */
+    public static boolean checkFileUriReadPermissions(Activity activity, Uri uri, int requestCode) {
+        boolean isStoragePermissionRequired = "file".equals(uri.getScheme());
+        if (isStoragePermissionRequired && ContextCompat.checkSelfPermission(activity,
+                Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(activity,
+                    new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, requestCode);
+            return false;
+        } else {
+            return true;
+        }
+    }
 
     public static Uri getFileShare(Context context, File shareFile) {
         return FileProvider.getUriForFile(context, FILE_PROVIDER_AUTHORITY, shareFile);

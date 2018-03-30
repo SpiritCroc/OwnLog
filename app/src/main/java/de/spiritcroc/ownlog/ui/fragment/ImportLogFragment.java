@@ -23,6 +23,7 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -68,10 +69,11 @@ import de.spiritcroc.ownlog.data.LoadLogItemsTask;
 import de.spiritcroc.ownlog.data.LoadTagItemsTask;
 import de.spiritcroc.ownlog.data.LogItem;
 import de.spiritcroc.ownlog.data.TagItem;
+import de.spiritcroc.ownlog.ui.PermissionRequester;
 import de.spiritcroc.ownlog.ui.activity.SingleFragmentActivity;
 
 public class ImportLogFragment extends BaseFragment implements PasswdHelper.RequestDbListener,
-        AdapterView.OnItemClickListener {
+        AdapterView.OnItemClickListener, PermissionRequester {
 
     private static final String TAG = ImportLogFragment.class.getSimpleName();
 
@@ -81,6 +83,8 @@ public class ImportLogFragment extends BaseFragment implements PasswdHelper.Requ
 
     private static final int DB_REQUEST_LOCAL = 1;
     private static final int DB_REQUEST_IMPORT = 2;
+
+    private static final int PERMISSION_REQUEST_URI = 1;
 
     private Uri mFileUri;
     private FileHelper.ImportFiles mImportFiles;
@@ -110,7 +114,30 @@ public class ImportLogFragment extends BaseFragment implements PasswdHelper.Requ
         super.onCreate(savedInstanceState);
         mFileUri = Uri.parse(getArguments().getString(EXTRA_URI));
         if (DEBUG) Log.d(TAG, "file uri is " + mFileUri);
-        new ExtractDbTask().execute();
+        if (FileHelper.checkFileUriReadPermissions(getActivity(), mFileUri,
+                PERMISSION_REQUEST_URI)) {
+            new ExtractDbTask().execute();
+        }
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String[] permissions,
+                                           int[] grantResults) {
+        switch (requestCode) {
+            case PERMISSION_REQUEST_URI:
+                // Anything denied that we need?
+                for (int result: grantResults) {
+                    if (result != PackageManager.PERMISSION_GRANTED) {
+                        Toast.makeText(getActivity().getApplicationContext(),
+                                R.string.error_permission_denied_read_external_storage,
+                                Toast.LENGTH_LONG).show();
+                        getActivity().finish();
+                        return;
+                    }
+                }
+                // Read it now
+                new ExtractDbTask().execute();
+        }
     }
 
     @Override
