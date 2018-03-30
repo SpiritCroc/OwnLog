@@ -323,7 +323,8 @@ public class LogAttachmentsEditFragment extends LogAttachmentsShowFragment
             return getString(R.string.error_should_not_be_empty);
         }
         String shouldNotExist = DbContract.LogAttachment2.COLUMN_ATTACHMENT_NAME
-                + " = '" + mTmpAttachmentName + "'";
+                + " = '" + mTmpAttachmentName + "' AND "
+                + DbContract.LogAttachment2.COLUMN_LOG + " = '" + getLogId() + "'";
         if (mRequestedAttachmentPosition >= 0) {
             shouldNotExist += " AND " + DbContract.LogAttachment2._ID
                     + " != " + getAttachment(mRequestedAttachmentPosition).id;
