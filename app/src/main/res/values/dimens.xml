@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-    Copyright (C) 2017 SpiritCroc
+    Copyright (C) 2017-2018 SpiritCroc
     Email: spiritcroc@gmail.com
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -26,6 +26,7 @@
     <dimen name="list_item_vertical_padding">16dp</dimen>
     <dimen name="list_header_horizontal_padding">@dimen/list_item_horizontal_padding</dimen>
     <dimen name="list_header_vertical_padding">8dp</dimen>
+    <dimen name="list_content_top_padding">8dp</dimen>
 
     <dimen name="list_smooth_scroll_offset">16dp</dimen>
 

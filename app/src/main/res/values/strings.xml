@@ -38,6 +38,7 @@
     <string name="action_tag">@string/tags</string>
     <string name="action_strategy">@string/strategy</string>
     <string name="action_import">@string/import1</string>
+    <string name="action_layout_continuous">Show content</string>
 
     <string name="drawer_filters">@string/filters</string>
     <string name="drawer_add_filter">Add filter&#8230;</string>

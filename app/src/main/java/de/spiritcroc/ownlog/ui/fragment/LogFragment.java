@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2017 SpiritCroc
+ * Copyright (C) 2017-2018 SpiritCroc
  * Email: spiritcroc@gmail.com
  *
  * This program is free software: you can redistribute it and/or modify
@@ -72,6 +72,8 @@ public class LogFragment extends BaseFragment implements PasswdHelper.RequestDbL
     private static final String TAG = LogFragment.class.getSimpleName();
 
     private static final String KEY_FILTER_ID = LogFragment.class.getName() + ".filterId";
+    private static final String KEY_LAYOUT_CONTINUOUS = LogFragment.class.getName() +
+            ".layoutContinuous";
 
     private static final boolean DEBUG = false;
 
@@ -83,6 +85,7 @@ public class LogFragment extends BaseFragment implements PasswdHelper.RequestDbL
     // Next filter id: default -2: should never be a valid filter id, so default gets selected
     private long mNextFilterId = -2;
     private LogFilterSelector mLogFilterSelector;
+    boolean mLayoutContinuous = false;
 
     private LogArrayAdapter mAdapter;
 
@@ -182,6 +185,8 @@ public class LogFragment extends BaseFragment implements PasswdHelper.RequestDbL
 
         if (savedInstanceState != null) {
             mNextFilterId = savedInstanceState.getLong(KEY_FILTER_ID, mNextFilterId);
+            mLayoutContinuous = savedInstanceState.getBoolean(KEY_LAYOUT_CONTINUOUS,
+                    mLayoutContinuous);
         }
 
         setHasOptionsMenu(true);
@@ -221,11 +226,18 @@ public class LogFragment extends BaseFragment implements PasswdHelper.RequestDbL
     }
 
     @Override
+    public void onPrepareOptionsMenu(Menu menu) {
+        super.onPrepareOptionsMenu(menu);
+        menu.findItem(R.id.action_layout_continuous).setChecked(mLayoutContinuous);
+    }
+
+    @Override
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
         if (mLogFilters != null) {
             outState.putLong(KEY_FILTER_ID, mLogFilters.get(mCurrentFilter).id);
         }
+        outState.putBoolean(KEY_LAYOUT_CONTINUOUS, mLayoutContinuous);
     }
 
     @Override
@@ -243,6 +255,10 @@ public class LogFragment extends BaseFragment implements PasswdHelper.RequestDbL
             case R.id.action_add:
                 LogItemEditFragment.show(getActivity(), null);
                 return true;
+            case R.id.action_layout_continuous:
+                mLayoutContinuous = !mLayoutContinuous;
+                item.setChecked(mLayoutContinuous);
+                loadContent(false);
             default:
                 return super.onOptionsItemSelected(item);
         }
@@ -336,8 +352,13 @@ public class LogFragment extends BaseFragment implements PasswdHelper.RequestDbL
                 Log.w(TAG, "Content loaded, but activity is null");
                 return;
             }
-            mAdapter = new LogArrayAdapter(getActivity(), R.layout.log_list_item,
-                    result.toArray(new LogItem[result.size()]));
+            if (mLayoutContinuous) {
+                mAdapter = new ContinuousLogArrayAdapter(getActivity(), R.layout.log_list_item,
+                        result.toArray(new LogItem[result.size()]));
+            } else {
+                mAdapter = new LogArrayAdapter(getActivity(), R.layout.log_list_item,
+                        result.toArray(new LogItem[result.size()]));
+            }
             if (getView() == null) {
                 Log.w(TAG, "Content loaded, but view is null");
                 return;
@@ -409,13 +430,17 @@ public class LogFragment extends BaseFragment implements PasswdHelper.RequestDbL
             loadResources();
         }
 
+        protected View getInflatedView(ViewGroup parent) {
+            LayoutInflater inflater = (LayoutInflater) getActivity()
+                    .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+            return inflater.inflate(R.layout.log_list_item, parent, false);
+        }
+
         @Override
         public @NonNull View getView(int position, View convertView, @NonNull ViewGroup parent) {
             LogItemHolder holder;
             if (convertView == null) {
-                LayoutInflater inflater = (LayoutInflater) getActivity()
-                        .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-                convertView = inflater.inflate(R.layout.log_list_item, parent, false);
+                convertView = getInflatedView(parent);
 
                 holder = new LogItemHolder();
                 holder.headerLayout = (LinearLayout) convertView.findViewById(R.id.header_layout);
@@ -424,6 +449,7 @@ public class LogFragment extends BaseFragment implements PasswdHelper.RequestDbL
                 holder.date2 = (TextView) convertView.findViewById(R.id.date_2);
                 holder.date3 = (TextView) convertView.findViewById(R.id.date_3);
                 holder.title = (TextView) convertView.findViewById(R.id.title);
+                holder.content = (TextView) convertView.findViewById(R.id.content);
                 holder.tag = (TextView) convertView.findViewById(R.id.tag);
                 holder.attachment = convertView.findViewById(R.id.attachment);
 
@@ -443,7 +469,12 @@ public class LogFragment extends BaseFragment implements PasswdHelper.RequestDbL
             String date2text = DateFormatter.getOverviewPart2(getContext(), item.time);
             holder.date2.setText(TextUtils.isEmpty(date2text) ? date2text : (date2text + " "));
             holder.date3.setText(DateFormatter.getOverviewPart3(getContext(), item.time));
-            holder.title.setText(TextUtils.isEmpty(item.title) ? item.content : item.title);
+            if (holder.content == null) {
+                holder.title.setText(TextUtils.isEmpty(item.title) ? item.content : item.title);
+            } else {
+                holder.title.setText(item.title);
+                holder.content.setText(item.content);
+            }
             holder.tag.setText(TagFormatter.formatTags(getResources(), item.tags));
             holder.attachment.setVisibility(item.hasAttachments ? View.VISIBLE : View.GONE);
 
@@ -474,6 +505,18 @@ public class LogFragment extends BaseFragment implements PasswdHelper.RequestDbL
 
     }
 
+    private class ContinuousLogArrayAdapter extends LogArrayAdapter {
+        public ContinuousLogArrayAdapter(Context context, int resource, LogItem[] objects) {
+            super(context, resource, objects);
+        }
+        @Override
+        protected View getInflatedView(ViewGroup parent) {
+            LayoutInflater inflater = (LayoutInflater) getActivity()
+                    .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+            return inflater.inflate(R.layout.log_list_item_continuous, parent, false);
+        }
+    }
+
     private static class LogItemHolder {
         LinearLayout headerLayout;
         LinearLayout contentLayout;
@@ -481,6 +524,7 @@ public class LogFragment extends BaseFragment implements PasswdHelper.RequestDbL
         TextView date2;
         TextView date3;
         TextView title;
+        TextView content;
         TextView tag;
         View attachment;
     }

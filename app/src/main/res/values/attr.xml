@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-    Copyright (C) 2017 SpiritCroc
+    Copyright (C) 2017-2018 SpiritCroc
     Email: spiritcroc@gmail.com
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -21,6 +21,7 @@
     <attr name="textColorListDate3" format="color" />
     <attr name="textColorListTitle" format="color" />
     <attr name="textColorListTag" format="color" />
+    <attr name="textColorListContent" format="color" />
     <attr name="textColorStatus" format="color" />
     <attr name="foregroundColorListAttachment" format="color" />
     <attr name="backgroundColorListHeader" format="color" />
