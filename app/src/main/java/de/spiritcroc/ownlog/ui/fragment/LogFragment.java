@@ -71,6 +71,7 @@ public class LogFragment extends BaseFragment implements PasswdHelper.RequestDbL
 
     private static final String TAG = LogFragment.class.getSimpleName();
 
+    private static final String KEY_LIST_POSITION = LogFragment.class.getName() + ".listPosition";
     private static final String KEY_FILTER_ID = LogFragment.class.getName() + ".filterId";
     private static final String KEY_LAYOUT_CONTINUOUS = LogFragment.class.getName() +
             ".layoutContinuous";
@@ -94,6 +95,7 @@ public class LogFragment extends BaseFragment implements PasswdHelper.RequestDbL
     private ArrayList<Integer> mSelectedItems = new ArrayList<>();
 
     private boolean mRememberListPosition = true;
+    private int mRestoreListPosition = -1;
 
     private LogItem mScrollAimEntry = null;
     private int mAimEntryPosition = -1;
@@ -184,6 +186,7 @@ public class LogFragment extends BaseFragment implements PasswdHelper.RequestDbL
         super.onCreate(savedInstanceState);
 
         if (savedInstanceState != null) {
+            mRestoreListPosition = savedInstanceState.getInt(KEY_LIST_POSITION, -1);
             mNextFilterId = savedInstanceState.getLong(KEY_FILTER_ID, mNextFilterId);
             mLayoutContinuous = savedInstanceState.getBoolean(KEY_LAYOUT_CONTINUOUS,
                     mLayoutContinuous);
@@ -234,6 +237,13 @@ public class LogFragment extends BaseFragment implements PasswdHelper.RequestDbL
     @Override
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
+        View v = getView();
+        if (v != null) {
+            ListView listView = (ListView) v.findViewById(R.id.list_view);
+            if (listView != null) {
+                outState.putInt(KEY_LIST_POSITION, listView.getFirstVisiblePosition());
+            }
+        }
         if (mLogFilters != null) {
             outState.putLong(KEY_FILTER_ID, mLogFilters.get(mCurrentFilter).id);
         }
@@ -364,15 +374,20 @@ public class LogFragment extends BaseFragment implements PasswdHelper.RequestDbL
                 return;
             }
             final ListView listView = (ListView) getView().findViewById(R.id.list_view);
-            if (mRememberListPosition) {
+            if (mRememberListPosition || mRestoreListPosition > 0) {
                 final View view = listView.getChildAt(0);
                 int top = (view == null ? 0 : view.getTop());
                 int index = listView.getFirstVisiblePosition();
-                int firstVisiblePos = listView.getFirstVisiblePosition();
-                int lastVisiblePos = listView.getLastVisiblePosition();
                 listView.setAdapter(mAdapter);
-                listView.setSelectionFromTop(index, top);
+                if (mRestoreListPosition > 0) {
+                    listView.setSelectionFromTop(mRestoreListPosition, top);
+                    mRestoreListPosition = -1;
+                } else {
+                    listView.setSelectionFromTop(index, top);
+                }
                 if (mScrollAimEntry != null) {
+                    int firstVisiblePos = listView.getFirstVisiblePosition();
+                    int lastVisiblePos = listView.getLastVisiblePosition();
                     mAimEntryPosition = result.indexOf(mScrollAimEntry);
                     // If item is not on the screen: scroll there
                     if (mAimEntryPosition >= 0 && mAimEntryPosition < result.size()
