@@ -216,16 +216,11 @@ public class LogFragment extends BaseFragment implements PasswdHelper.RequestDbL
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         super.onCreateOptionsMenu(menu, inflater);
         inflater.inflate(R.menu.fragment_log, menu);
-        mSearchView = (SearchView) menu.findItem(R.id.action_search).getActionView();
-        mSearchView.setOnQueryTextListener(mSearchTextQueryListener);
-        mSearchView.setOnQueryTextFocusChangeListener(new View.OnFocusChangeListener() {
-            @Override
-            public void onFocusChange(View v, boolean hasFocus) {
-                if (!hasFocus && (mLogSearch == null || mLogSearch.equals(""))) {
-                    closeSearchView();
-                }
-            }
-        });
+        MenuItem searchItem = menu.findItem(R.id.action_search);
+        searchItem.setOnActionExpandListener(mSearchActionExpandListener);
+        mSearchView = (SearchView) searchItem.getActionView();
+        mSearchView.setOnQueryTextListener(mSearchQueryTextListener);
+        mSearchView.setOnQueryTextFocusChangeListener(mSearchQueryTextFocusChangeListener);
     }
 
     @Override
@@ -269,6 +264,7 @@ public class LogFragment extends BaseFragment implements PasswdHelper.RequestDbL
                 mLayoutContinuous = !mLayoutContinuous;
                 item.setChecked(mLayoutContinuous);
                 loadContent(false);
+                return true;
             default:
                 return super.onOptionsItemSelected(item);
         }
@@ -656,7 +652,17 @@ public class LogFragment extends BaseFragment implements PasswdHelper.RequestDbL
         LocalBroadcastManager.getInstance(getActivity()).sendBroadcast(notifyIntent);
     }
 
-    private SearchView.OnQueryTextListener mSearchTextQueryListener =
+    private View.OnFocusChangeListener mSearchQueryTextFocusChangeListener =
+            new View.OnFocusChangeListener() {
+                @Override
+                public void onFocusChange(View v, boolean hasFocus) {
+                    if (!hasFocus && (mLogSearch == null || mLogSearch.equals(""))) {
+                        closeSearchView();
+                    }
+                }
+            };
+
+    private SearchView.OnQueryTextListener mSearchQueryTextListener =
             new SearchView.OnQueryTextListener() {
                 @Override
                 public boolean onQueryTextSubmit(String s) {
@@ -671,6 +677,23 @@ public class LogFragment extends BaseFragment implements PasswdHelper.RequestDbL
                     mLogSearch = s;
                     loadContent(false);
                     return false;
+                }
+            };
+
+    private MenuItem.OnActionExpandListener mSearchActionExpandListener =
+            new MenuItem.OnActionExpandListener() {
+                @Override
+                public boolean onMenuItemActionExpand(MenuItem item) {
+                    // Fix duplicate entries showing
+                    item.setVisible(false);
+                    return true;
+                }
+
+                @Override
+                public boolean onMenuItemActionCollapse(MenuItem item) {
+                    // Fix missing entries
+                    getActivity().invalidateOptionsMenu();
+                    return true;
                 }
             };
 
