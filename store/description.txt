@@ -16,6 +16,7 @@ Log entries consist of:
 - title
 - content
 - tags
+- attachments (any kind of file)
 
 You can filter your log for tags, and also do a text search for title and content.
 
