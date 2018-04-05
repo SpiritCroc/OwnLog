@@ -108,4 +108,9 @@ public final class Util {
             }
         }
     }
+
+    public static void onExit(Context context) {
+        PasswdHelper.onExit();
+        FileHelper.onExit(context);
+    }
 }

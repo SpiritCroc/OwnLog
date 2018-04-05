@@ -39,6 +39,7 @@
     <string name="action_strategy">@string/strategy</string>
     <string name="action_import">@string/import1</string>
     <string name="action_layout_continuous">Show content</string>
+    <string name="action_exit">@string/exit</string>
 
     <string name="drawer_filters">@string/filters</string>
     <string name="drawer_add_filter">Add filter&#8230;</string>
@@ -290,6 +291,7 @@
     <string name="easteregg">Semmelknödel</string>
     <string name="easteregg_1">NOOT NOOT!</string>
     <string name="edit">Edit</string>
+    <string name="exit">Exit</string>
     <string name="export">Export</string>
     <string name="filters">Filters</string>
     <string name="import1">Import</string>

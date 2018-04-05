@@ -315,4 +315,9 @@ public abstract class FileHelper {
         }
         dir.delete();
     }
+
+
+    static void onExit(Context context) {
+        rmdir(context.getCacheDir());
+    }
 }

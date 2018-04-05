@@ -162,4 +162,9 @@ public class PasswdHelper {
     public interface RequestDbListener {
         void receiveWritableDatabase(SQLiteDatabase db, int requestId);
     }
+
+    static void onExit() {
+        // Reset password
+        passwd = "";
+    }
 }

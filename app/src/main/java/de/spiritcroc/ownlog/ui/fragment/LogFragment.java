@@ -59,6 +59,7 @@ import de.spiritcroc.ownlog.PasswdHelper;
 import de.spiritcroc.ownlog.R;
 import de.spiritcroc.ownlog.Settings;
 import de.spiritcroc.ownlog.TagFormatter;
+import de.spiritcroc.ownlog.Util;
 import de.spiritcroc.ownlog.data.DbHelper;
 import de.spiritcroc.ownlog.data.LoadLogFiltersTask;
 import de.spiritcroc.ownlog.data.LoadLogItemsTask;
@@ -265,6 +266,10 @@ public class LogFragment extends BaseFragment implements PasswdHelper.RequestDbL
                 mLayoutContinuous = !mLayoutContinuous;
                 item.setChecked(mLayoutContinuous);
                 loadContent(false);
+                return true;
+            case R.id.action_exit:
+                Util.onExit(getActivity());
+                getActivity().finish();
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
