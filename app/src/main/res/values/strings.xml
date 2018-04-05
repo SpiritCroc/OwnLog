@@ -96,6 +96,10 @@
     <string name="edit_log_tags_add_new">New tag&#8230;</string>
     <string name="edit_exclude_log_tags">Exclude tags:</string>
 
+    <string name="edit_tag_item_name">@string/name</string>
+    <string name="edit_tag_item_description">Description</string>
+    <string name="edit_tag">@string/edit</string>
+
     <string name="has_attachments">Has attachments</string>
     <string name="log_attachments_show">@string/attachments</string>
     <string name="edit_log_attachments_add">Add attachment</string>
@@ -106,10 +110,6 @@
     <string name="edit_log_attachment_name_default">@string/attachment</string>
     <string name="add_log_attachment_progress_title">Adding attachment</string>
     <string name="add_log_attachment_progress_message">Copying file to app storage, this might take a while depending on the file size</string>
-
-    <string name="edit_tag_item_name">@string/name</string>
-    <string name="edit_tag_item_description">Description</string>
-    <string name="edit_tag">@string/edit</string>
 
     <string name="error_tag_with_name_exists">Another tag with the same name already exists</string>
     <string name="error_should_not_be_empty">Should not be empty</string>
@@ -140,12 +140,12 @@
 
 
     <string name="export_file_name" translatable="false">ownlog_%s.owloba</string>
-    <string name="export_file_path_pattern">.*\\.owloba</string>
+    <string name="export_file_path_pattern" translatable="false">.*\\.owloba</string>
     <string name="export_file_date_format" translatable="false">yyyy-MM-dd_HHmm</string>
     <string name="export_file_db" translatable="false">db</string>
     <string name="export_file_attachments" translatable="false">attachments</string>
     <string name="export_dialog_title">Export logs</string>
-    <string name="export_dialog_message">This will create a backup of all your logs.\nMake sure you have an app installed to share or save the resulting file (e.g. an email application or a file explorer with \"save as\"-functionality)</string>
+    <string name="export_dialog_message">This will create a backup of all your logs.\nMake sure you have an app installed to share or save the resulting file (e.g. an email application or a file explorer with \"save as\"-functionality).</string>
     <string name="export_dialog_progress_message">Creating backup</string>
 
     <string name="import_file_dir" translatable="false">importing</string>

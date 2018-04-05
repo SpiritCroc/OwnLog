@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-    Copyright (C) 2017 SpiritCroc
+    Copyright (C) 2017-2018 SpiritCroc
     Email: spiritcroc@gmail.com
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -26,20 +26,29 @@
     <string name="title_tag_item_edit">Stichwort bearbeiten</string>
     <string name="title_log_filter_add">Neuer Filter</string>
     <string name="title_log_filter_edit">Filter bearbeiten</string>
+    <string name="title_import_log">Import-Auswahl</string>
 
     <string name="action_add">@string/add</string>
+    <string name="action_attachments">@string/attachments</string>
     <string name="action_delete">@string/delete</string>
     <string name="action_edit">@string/edit</string>
     <string name="action_save">@string/save</string>
     <string name="action_search">@string/search</string>
     <string name="action_select_all">@string/select_all</string>
     <string name="action_tag">@string/tags</string>
+    <string name="action_strategy">@string/strategy</string>
+    <string name="action_import">@string/import1</string>
+    <string name="action_layout_continuous">Inhalt anzeigen</string>
+    <string name="action_exit">@string/exit</string>
 
     <string name="drawer_filters">@string/filters</string>
     <string name="drawer_add_filter">Neuer Filter&#8230;</string>
     <string name="drawer_more">@string/more</string>
     <string name="drawer_settings">@string/settings</string>
     <string name="drawer_about">@string/about</string>
+    <string name="drawer_data_management">Datenverwaltung</string>
+    <string name="drawer_export">@string/export</string>
+    <string name="drawer_import">@string/import1</string>
 
     <plurals name="action_mode_selected_items">
         <item quantity="one">%d ausgewählt</item>
@@ -70,6 +79,8 @@
     <string name="dialog_select_tags">Stichwörter auswählen</string>
     <string name="dialog_delete_log_filter_entry_title">Filter \"%s\" löschen?</string>
     <string name="dialog_deleted_log_filter_entry_toast_title">Filter \"%s\" gelöscht</string>
+    <string name="dialog_delete_attachment">\"%s\" löschen?</string>
+    <string name="dialog_delete_attachment_title">Anhang löschen</string>
 
     <string name="edit_password_hint">Passwort eingeben</string>
     <string name="edit_wrong_password">Falsches Passwort</string>
@@ -85,13 +96,34 @@
     <string name="edit_log_tags">Stichwörter:</string>
     <string name="edit_log_tags_add">Stichwort hinzufügen</string>
     <string name="edit_log_tags_add_new">Neues Stichwort&#8230;</string>
+    <string name="edit_exclude_log_tags">Stichwörter ausschließen:</string>
 
     <string name="edit_tag_item_name">@string/name</string>
     <string name="edit_tag_item_description">Beschreibung</string>
     <string name="edit_tag">@string/edit</string>
 
+    <string name="has_attachments">Enthält Anhang</string>
+    <string name="log_attachments_show">@string/attachments</string>
+    <string name="edit_log_attachments_add">Neuer Anhang</string>
+    <string name="edit_log_attachment_rename">@string/rename</string>
+    <string name="edit_log_attachment_rename_title">Name eingeben</string>
+    <string name="edit_log_attachment_delete">@string/delete</string>
+    <string name="edit_log_attachment_name_exists">Name bereits vergeben</string>
+    <string name="edit_log_attachment_name_default">@string/attachment</string>
+    <string name="add_log_attachment_progress_title">Anhang wird hinzugefügt</string>
+    <string name="add_log_attachment_progress_message">Datei wird in den App-Speicher kopiert, dies kann je nach Dateigröße eine Weile dauern</string>
+
     <string name="error_tag_with_name_exists">Identisches Stichwort existiert bereits</string>
     <string name="error_should_not_be_empty">Darf nicht leer sein</string>
+    <string name="error_internal">Interner Fehler</string>
+    <string name="error_io_in">Datei kann nicht gelesen werden</string>
+    <string name="error_io_out">@string/error_internal</string>
+    <string name="error_upgrade_title">Upgrade fehlgeschlagen</string>
+    <string name="error_upgrade_summary">Es scheint, als ob die App-Daten von einer nicht unterstützten Version der App erstellt wurden. Bitte die App aktualisieren, oder die App-Daten löschen (auf diese Weise gehen sämtliche Einträge, Einstellungen usw. verloren).</string>
+    <string name="error_downgrade_summary">Es scheint, als ob die App auf eine ältere Version als zuvor aktualisiert wurde. Bitte die App aktualisieren, oder die App-Daten löschen (auf diese Weise gehen sämtliche Einträge, Einstellungen usw. verloren).</string>
+    <string name="error_import_failure_title">Import fehlgeschlagen</string>
+    <string name="error_import_failure_message">Das Backup kann nicht gelesen werden! Vielleicht wurde es von einer neueren Version der App erstellt, oder beschädigt.</string>
+    <string name="error_permission_denied_read_external_storage">Fehlende Berechtigung für den Speicherzugriff</string>
 
     <string name="edit_log_filter_name">@string/name</string>
     <string name="edit_log_filter_sort_order">"Sortierreihenfolge: "</string>
@@ -105,6 +137,44 @@
     <string name="edit_log_filter_sort_order_date_end_descending">Zuletzt bearbeitete Einträge zuerst</string>
 
     <string name="log_list_tag_list_separator">@string/string_list_separator</string>
+
+    <string name="search_switched_to_show_all_toast">Durchsuche alle Einträge</string>
+
+
+    <string name="export_dialog_title">Logs exportieren</string>
+    <string name="export_dialog_message">Dies wird ein Backup aller Logeinträge erstellen.\nStellen Sie sicher, dass eine App vorhanden ist, welche die erstellte Datei weitergeben oder speichern kann, wie zum Beispiel eine E-Mail-Anwendung oder ein Datei-Explorer mit \"Speichern als\"-Funktion.</string>
+    <string name="export_dialog_progress_message">Backup wird erstellt</string>
+
+    <string name="import_read_message">Backup wird gelesen, dies kann eine Weile dauern</string>
+    <string name="import_compare_message">Backup wird ausgewertet</string>
+    <string name="import_import_message">Backup wird importiert</string>
+    <string name="import_successful">Importieren erfolgreich</string>
+    <string name="import_failure">Importieren fehlgeschlagen</string>
+    <string name="import_dialog_request_password">Backup benötigt Passwort</string>
+    <string name="import_change_status_new">Neu</string>
+    <string name="import_change_status_deprecated">Älter als lokale Version</string>
+    <string name="import_change_status_updated">Aktualisiert</string>
+    <string name="import_change_status_changed">Verändert</string>
+    <string name="import_change_status_same">Stimmt mit lokaler Version überein</string>
+    <string name="import_change_tags_status_updated">Mehr Stichwörter als lokale Version</string>
+    <string name="import_change_tags_status_deprecated">Weniger Stichwörter als lokale Version</string>
+    <string name="import_change_tags_status_changed">Stichwörter verschieden</string>
+    <string name="import_change_attachment_status_updated">Mehr Anhänge als lokale Version</string>
+    <string name="import_change_attachment_status_deprecated">Weniger Anhänge als lokale Version</string>
+    <string name="import_change_attachment_status_changed">Anhänge verschieden</string>
+    <string name="import_strategy_latest">Importieren, falls Backup neuer</string>
+    <string name="import_strategy_overwrite">Überschreibe lokale Einträge bei Konflikten</string>
+    <string name="import_strategy_if_new">Behalte lokale Einträge bei Konflikten</string>
+    <string name="import_dialog_strategy_title">Bevorzuge Import-Strategie wählen</string>
+    <string name="import_dialog_title">Backup importieren</string>
+    <string name="import_dialog_message">Je nach Auswahl kann dies lokale Einträge bei Konflikten überschreiben. Fortfahren?</string>
+
+
+    <!-- Filesize formats -->
+    <string name="filesize_b">%d B</string>
+    <string name="filesize_kib">%d KiB</string>
+    <string name="filesize_mib">%d MiB</string>
+    <string name="filesize_gib">%d GiB</string>
 
 
     <!-- Date formats defaults (SimpleDateFormat) -->
@@ -142,6 +212,9 @@
 
 
     <!-- About screen -->
+    <string name="about_app_title">@string/app_name</string>
+    <string name="about_app_summary">Version %1$s (%2$d)</string>
+
     <string name="about_licence_title">Lizenz</string>
     <string name="about_licence_summary">Diese App wird unter der GNU GENERAL PUBLIC LICENSE, Version 3 zur Verfügung gestellt.</string>
 
@@ -198,6 +271,8 @@
     <!-- General purpose strings to reference from more specific context -->
     <string name="about">Über</string>
     <string name="add">Neu</string>
+    <string name="attachment">Anhang</string>
+    <string name="attachments">Anhänge</string>
     <string name="cancel">Abbrechen</string>
     <string name="content">Inhalt</string>
     <string name="date">Datum</string>
@@ -206,14 +281,20 @@
     <string name="easteregg">Semmelknödel</string>
     <string name="easteregg_1">NÖÖT NÖÖT!</string>
     <string name="edit">Bearbeiten</string>
+    <string name="exit">Beenden</string>
+    <string name="export">Exportieren</string>
     <string name="filters">Filter</string>
+    <string name="import1">Importieren</string>
     <string name="more">Mehr</string>
     <string name="name">Name</string>
     <string name="ok">OK</string>
+    <string name="rename">Umbenennen</string>
+    <string name="preview">Vorschau</string>
     <string name="save">Speichern</string>
     <string name="search">Suche</string>
     <string name="select_all">Alle auswählen</string>
     <string name="settings">Einstellungen</string>
+    <string name="strategy">Strategie</string>
     <string name="string_list_separator">", "</string>
     <string name="tags">Stichwörter</string>
     <string name="title">Titel</string>
