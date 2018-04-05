@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2017 SpiritCroc
+ * Copyright (C) 2017-2018 SpiritCroc
  * Email: spiritcroc@gmail.com
  *
  * This program is free software: you can redistribute it and/or modify
@@ -22,19 +22,22 @@ import android.os.Bundle;
 import android.preference.Preference;
 import android.widget.Toast;
 
+import de.spiritcroc.ownlog.BuildConfig;
 import de.spiritcroc.ownlog.R;
 
 public class AboutFragment extends BaseSettingsFragment {
 
-    private static final String ABOUT_LICENSE = "about_licence";
+    private static final String ABOUT_APP = "about_app";
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         addPreferencesFromResource(R.xml.about);
 
-        Preference licencePref = findPreference(ABOUT_LICENSE);
-        new PreferenceEastereggHandler(licencePref, mEastereggRunnable);
+        Preference appPref = findPreference(ABOUT_APP);
+        appPref.setSummary(getString(R.string.about_app_summary,
+                BuildConfig.VERSION_NAME, BuildConfig.VERSION_CODE));
+        new PreferenceEastereggHandler(appPref, mEastereggRunnable);
     }
 
     private Runnable mEastereggRunnable = new Runnable() {
