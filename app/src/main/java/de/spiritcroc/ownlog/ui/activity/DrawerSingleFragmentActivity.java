@@ -114,6 +114,11 @@ public class DrawerSingleFragmentActivity extends SingleFragmentActivity
     }
 
     @Override
+    public void overwriteFilterSelection(int position) {
+        mDrawer.setSelection(position, true);
+    }
+
+    @Override
     protected void setupFragment(BaseFragment fragment) {
         if (fragment instanceof LogFilterProvider) {
             setFilterProvider((LogFilterProvider) fragment);

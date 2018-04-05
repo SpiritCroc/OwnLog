@@ -135,6 +135,8 @@
 
     <string name="log_list_tag_list_separator">@string/string_list_separator</string>
 
+    <string name="search_switched_to_show_all_toast">Searching all entries</string>
+
 
     <string name="export_file_name" translatable="false">ownlog_%s.owloba</string>
     <string name="export_file_path_pattern">.*\\.owloba</string>

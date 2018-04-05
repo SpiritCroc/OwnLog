@@ -47,6 +47,7 @@ import android.widget.ArrayAdapter;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import net.sqlcipher.database.SQLiteDatabase;
 
@@ -292,7 +293,6 @@ public class LogFragment extends BaseFragment implements PasswdHelper.RequestDbL
     @Override
     public void selectFilter(int position) {
         mCurrentFilter = position;
-        closeSearchView();
         loadContent(false);
     }
 
@@ -668,7 +668,14 @@ public class LogFragment extends BaseFragment implements PasswdHelper.RequestDbL
                 public boolean onQueryTextSubmit(String s) {
                     // Clear focus so searchView does not steal next back button press
                     mSearchView.clearFocus();
-                    // No need to reload content; already done in onQueryTextChange
+                    if (mCurrentFilter != 0) {
+                        // Search all: default filter
+                        mLogFilterSelector.overwriteFilterSelection(0);
+                        Toast.makeText(getActivity(), R.string.search_switched_to_show_all_toast,
+                                Toast.LENGTH_SHORT).show();
+                        // Reload will be done in selection change callback
+                    }
+                    // else: No need to reload content; already done in onQueryTextChange
                     return false;
                 }
 
