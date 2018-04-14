@@ -108,7 +108,9 @@ public abstract class FileHelper {
     }
 
     private static File getAttachmentsBasePath(Context context) {
-        return new File(context.getFilesDir(), ATTACHMENTS_PATH);
+       File result = new File(context.getFilesDir(), ATTACHMENTS_PATH);
+       result.mkdirs();
+       return result;
     }
 
     public static void removeAllAttachments(Context context, LogItem logItem) {
