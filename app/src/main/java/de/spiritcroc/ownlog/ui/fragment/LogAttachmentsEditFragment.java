@@ -395,8 +395,8 @@ public class LogAttachmentsEditFragment extends LogAttachmentsShowFragment
         }
         @Override
         protected void onPreExecute() {
-            View progressView = getLayoutInflater().inflate(R.layout.dialog_progess_indeterminate,
-                    null);
+            View progressView = getActivity().getLayoutInflater()
+                    .inflate(R.layout.dialog_progess_indeterminate, null);
             TextView messageView = progressView.findViewById(R.id.progress_message);
             messageView.setText(R.string.add_log_attachment_progress_message);
             mDialog = new AlertDialog.Builder(getActivity())
