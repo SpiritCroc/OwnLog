@@ -21,9 +21,9 @@ android {
 
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
-    implementation 'com.android.support:appcompat-v7:27.1.0'
-    implementation 'com.android.support:cardview-v7:27.1.0'
-    implementation 'com.android.support:design:27.1.0'
+    implementation 'com.android.support:appcompat-v7:27.1.1'
+    implementation 'com.android.support:cardview-v7:27.1.1'
+    implementation 'com.android.support:design:27.1.1'
     implementation 'com.github.spiritcroc:indeterminate-checkbox:1.1@aar'
     implementation 'com.google.android:flexbox:0.2.6'
     implementation('com.mikepenz:materialdrawer:5.9.0@aar') {
