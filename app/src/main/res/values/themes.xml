@@ -36,8 +36,8 @@
         <item name="backgroundColorEditTagView">#1e000000</item>
         <item name="backgroundColorPeekTitle">#eeeeee</item>
         <item name="backgroundColorPeekContent">?android:attr/colorBackground</item>
-        <item name="backgroundColorPeekCard">?android:attr/colorBackgroundFloating</item>
-        <item name="backgroundColorPeekActionBar">?android:attr/colorBackgroundFloating</item>
+        <item name="backgroundColorPeekCard">?attr/colorBackgroundFloating</item>
+        <item name="backgroundColorPeekActionBar">?attr/colorBackgroundFloating</item>
 
         <!-- modify material drawer colors -->
         <item name="material_drawer_background">?android:attr/colorBackground</item>
