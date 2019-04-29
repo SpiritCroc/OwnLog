@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2017 SpiritCroc
+ * Copyright (C) 2017-2019 SpiritCroc
  * Email: spiritcroc@gmail.com
  *
  * This program is free software: you can redistribute it and/or modify
@@ -20,9 +20,10 @@ package de.spiritcroc.ownlog.ui.fragment;
 
 import android.app.Fragment;
 import android.content.Intent;
-import android.graphics.BitmapFactory;
+import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.v4.app.ShareCompat;
 import android.support.v7.widget.RecyclerView;
 import android.util.DisplayMetrics;
@@ -33,9 +34,17 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool;
+import com.bumptech.glide.load.resource.bitmap.BitmapTransformation;
+import com.bumptech.glide.load.resource.bitmap.FitCenter;
+import com.bumptech.glide.request.target.Target;
+
 import net.sqlcipher.database.SQLiteDatabase;
 
 import java.io.File;
+import java.nio.charset.Charset;
+import java.security.MessageDigest;
 import java.util.ArrayList;
 
 import de.spiritcroc.ownlog.Constants;
@@ -307,56 +316,60 @@ public class LogAttachmentsShowFragment extends Fragment
         return new AttachmentViewHolder(v);
     }
 
+    private class AttachmentPreviewTransformation extends BitmapTransformation {
+        private final String ID = AttachmentPreviewTransformation.class.getCanonicalName();
+        private final byte[] ID_BYTES = ID.getBytes(Charset.forName("UTF-8"));
+
+        @Override
+        public Bitmap transform(@NonNull  BitmapPool pool, @NonNull Bitmap toTransform,
+                                int outWidth, int outHeight) {
+            int inSampleSize = 1;
+
+            // We don't need fullscreen, just a small preview
+            final int reqWidth = mViewWidth/mPicturePreviewScale;
+            final int reqHeight = reqWidth;
+
+            if (outHeight > reqHeight || outWidth > reqWidth) {
+                final int halfHeight = outHeight/2;
+                final int halfWidth = outWidth/2;
+                while ((halfHeight/inSampleSize) > reqHeight/mPicturePreviewScale &&
+                        (halfWidth/inSampleSize) > reqWidth/mPicturePreviewScale) {
+                    inSampleSize++;
+                }
+            }
+
+            return Bitmap.createScaledBitmap(toTransform, outWidth/inSampleSize,
+                    outHeight/inSampleSize, /*filter=*/ true);
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            return o instanceof AttachmentPreviewTransformation;
+        }
+
+        @Override
+        public int hashCode() {
+            return ID.hashCode();
+        }
+
+        @Override
+        public void updateDiskCacheKey(@NonNull  MessageDigest messageDigest) {
+            messageDigest.update(ID_BYTES);
+        }
+    }
+
     protected void onBindAttachmentViewHolder(AttachmentViewHolder holder, int position) {
         LogItem.Attachment attachment = mAttachments.get(position);
         File attachmentFile = FileHelper.getAttachmentFile(getActivity(), attachment);
         holder.mNameTextView.setText(attachment.name);
         holder.mSizeTextView.setText(Util.formatFileSize(getActivity(), attachmentFile.length()));
         // Preview
-        try {
-            // TODO speed up using cache/async loading?
-            // https://developer.android.com/topic/performance/graphics/load-bitmap.html
-            // Check dimensions
-            BitmapFactory.Options options = new BitmapFactory.Options();
-            options.inJustDecodeBounds = true;
-            BitmapFactory.decodeFile(attachmentFile.getAbsolutePath(), options);
-            if (options.outWidth != -1 && options.outHeight != -1) {
-                // Calculate inSampleSize
-                calculateInSampleSize(options);
-
-                // Load image
-                options.inJustDecodeBounds = false;
-                holder.mPreviewImageView.setImageBitmap(
-                        BitmapFactory.decodeFile(attachmentFile.getAbsolutePath(), options));
-                holder.mPreviewImageView.setVisibility(View.VISIBLE);
-            } else {
-                // Not an image
-                holder.mPreviewImageView.setVisibility(View.GONE);
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-            holder.mPreviewImageView.setVisibility(View.GONE);
-        }
-    }
-
-    private void calculateInSampleSize(BitmapFactory.Options options) {
-        final int width = options.outWidth;
-        final int height = options.outHeight;
-        int inSampleSize = 1;
-
-        // We don't need fullscreen, just a small preview
-        final int reqWidth = mViewWidth/mPicturePreviewScale;
-        final int reqHeight = reqWidth;
-
-        if (height > reqHeight || width > reqWidth) {
-            final int halfHeight = height/2;
-            final int halfWidth = width/2;
-            while ((halfHeight/inSampleSize) > reqHeight/mPicturePreviewScale &&
-                    (halfWidth/inSampleSize) > reqWidth/mPicturePreviewScale) {
-                inSampleSize++;
-            }
-        }
-        options.inSampleSize = inSampleSize;
+        holder.mPreviewImageView.setVisibility(View.VISIBLE);
+        Glide.with(holder.mPreviewImageView)
+                .load(attachmentFile.getAbsolutePath())
+                .transform(new FitCenter(), new AttachmentPreviewTransformation())
+                .override(Target.SIZE_ORIGINAL)
+                .into(holder.mPreviewImageView);
     }
 
     public interface OnUpdateListener {

@@ -72,8 +72,7 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:layout_marginTop="@dimen/attachment_margin"
-            android:contentDescription="@string/preview"
-            android:visibility="gone"/>
+            android:contentDescription="@string/preview"/>
 
     </LinearLayout>
 
