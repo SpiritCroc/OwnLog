@@ -32,7 +32,7 @@ public class TagFormatter {
         }
         String result = tags.get(0).name;
         for (int i = 1; i < tags.size(); i++) {
-            result += resources.getString(R.string.log_list_tag_list_separator) + tags.get(1).name;
+            result += resources.getString(R.string.log_list_tag_list_separator) + tags.get(i).name;
         }
         return result;
     }
