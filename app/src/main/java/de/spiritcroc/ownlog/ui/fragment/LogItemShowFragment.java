@@ -276,7 +276,7 @@ public class LogItemShowFragment extends BaseFragment implements PasswdHelper.Re
         }
         String result = tags.get(0).name;
         for (int i = 1; i < tags.size(); i++) {
-            result += getString(R.string.log_list_tag_list_separator) + tags.get(1).name;
+            result += getString(R.string.log_list_tag_list_separator) + tags.get(i).name;
         }
         return result;
     }
