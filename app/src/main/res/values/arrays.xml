@@ -90,4 +90,7 @@
         <item>mm</item>
     </string-array>
 
+    <!-- Empty array to use as entries/entryValues for listPreferences that use dynamic
+    entries to work around a crash on orientation change -->
+    <string-array name="empty_array" translatable="false" />
 </resources>

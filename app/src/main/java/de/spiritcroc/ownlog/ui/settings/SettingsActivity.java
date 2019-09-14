@@ -42,15 +42,25 @@ public class SettingsActivity extends BaseActivity {
     private static final String EXTRA_PREFERENCE_POSITION_TOP =
             "de.spiritcroc.ownlog.extra.preference_position_top";
 
+    private static final String FRAGMENT_TAG = "SettingsActivity.pref_fragment";
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
         setContentView(R.layout.activity_toolbar);
 
-        String preferenceKey = getIntent().getStringExtra(EXTRA_PREFERENCE_FRAGMENT);
-        preferenceFragment = getNewPreferenceFragment(preferenceKey);
-        getFragmentManager().beginTransaction().replace(R.id.content, preferenceFragment).commit();
+        // Search for existing fragment fron saved instance
+        preferenceFragment =
+                (BaseSettingsFragment) getFragmentManager().findFragmentByTag(FRAGMENT_TAG);
+        if (preferenceFragment == null) {
+            // Get new fragment
+            String preferenceKey = getIntent().getStringExtra(EXTRA_PREFERENCE_FRAGMENT);
+            preferenceFragment = getNewPreferenceFragment(preferenceKey);
+            getFragmentManager().beginTransaction()
+                    .replace(R.id.content, preferenceFragment, FRAGMENT_TAG)
+                    .commit();
+        }
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);

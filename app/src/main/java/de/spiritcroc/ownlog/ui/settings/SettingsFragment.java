@@ -120,7 +120,12 @@ public class SettingsFragment extends BaseSettingsFragment
 
     @Override
     public void onDialogDismiss(DialogFragment which) {
-        init();
+        // On configuration change, dialog is dismissed an our context is lost
+        if (getActivity() != null) {
+            init();
+        } else {
+            Log.w(TAG, "dialog dismiss with lost activity");
+        }
     }
 
     @Override

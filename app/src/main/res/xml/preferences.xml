@@ -24,7 +24,9 @@
     <ListPreference
         android:key="default_filter"
         android:title="@string/pref_default_filter_title"
-        android:defaultValue="-1" />
+        android:defaultValue="-1"
+        android:entries="@array/empty_array"
+        android:entryValues="@array/empty_array" />
 
     <PreferenceCategory
         android:title="@string/pref_category_ui">
