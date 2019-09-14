@@ -20,7 +20,7 @@ package de.spiritcroc.ownlog.ui.settings;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.v4.content.LocalBroadcastManager;
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
 import de.spiritcroc.ownlog.Constants;
 import de.spiritcroc.ownlog.R;

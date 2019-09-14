@@ -21,7 +21,7 @@ package de.spiritcroc.ownlog.data;
 
 import android.content.ContentValues;
 import android.content.Context;
-import android.support.annotation.Nullable;
+import androidx.annotation.Nullable;
 import android.util.Log;
 
 import net.sqlcipher.database.SQLiteDatabase;

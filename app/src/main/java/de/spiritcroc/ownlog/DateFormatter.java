@@ -19,7 +19,7 @@
 package de.spiritcroc.ownlog;
 
 import android.content.Context;
-import android.support.annotation.StringRes;
+import androidx.annotation.StringRes;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;

@@ -24,7 +24,7 @@ import android.app.DialogFragment;
 import android.content.DialogInterface;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.support.v4.app.ShareCompat;
+import androidx.core.app.ShareCompat;
 import android.util.Log;
 import android.view.View;
 import android.widget.ProgressBar;

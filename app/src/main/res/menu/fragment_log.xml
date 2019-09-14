@@ -27,7 +27,7 @@
         android:orderInCategory="1"
         android:icon="@drawable/ic_search"
         app:showAsAction="collapseActionView|ifRoom"
-        app:actionViewClass="android.support.v7.widget.SearchView" />
+        app:actionViewClass="androidx.appcompat.widget.SearchView" />
     <item
         android:id="@+id/action_layout_continuous"
         android:title="@string/action_layout_continuous"
