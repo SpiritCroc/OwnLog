@@ -25,4 +25,5 @@ package de.spiritcroc.ownlog.ui;
 public interface LogFilterSelector {
     void setFilterProvider(LogFilterProvider provider);
     void onFilterUpdate();
+    void overwriteFilterSelection(int position);
 }

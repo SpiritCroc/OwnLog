@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-    Copyright (C) 2017 SpiritCroc
+    Copyright (C) 2017-2018 SpiritCroc
     Email: spiritcroc@gmail.com
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -18,9 +18,16 @@
     android:title="@string/title_about">
 
     <Preference
+        android:key="about_app"
+        android:title="@string/about_app_title"
+        android:summary="@string/about_app_summary" />
+    <Preference
         android:key="about_licence"
         android:title="@string/about_licence_title"
-        android:summary="@string/about_licence_summary" />
+        android:summary="@string/about_licence_summary">
+        <intent android:action="android.intent.action.VIEW"
+            android:data="@string/about_licence_link" />
+    </Preference>
     <Preference
         android:title="@string/about_source_code_title"
         android:summary="@string/about_source_code_summary">

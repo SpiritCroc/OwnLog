@@ -43,6 +43,7 @@ import de.spiritcroc.ownlog.Constants;
 import de.spiritcroc.ownlog.PasswdHelper;
 import de.spiritcroc.ownlog.R;
 import de.spiritcroc.ownlog.data.DbContract;
+import de.spiritcroc.ownlog.data.DbHelper;
 import de.spiritcroc.ownlog.data.LoadTagItemsTask;
 import de.spiritcroc.ownlog.data.TagItem;
 
@@ -71,7 +72,7 @@ public class TagItemEditFragment extends DialogFragment implements PasswdHelper.
     private static final int DB_REQUEST_DELETE = 3;
 
     private boolean mAddItem = true;
-    private long mEditItemId = -1;
+    private long mEditItemId = TagItem.ID_NONE;
     private boolean mShouldHideKeyboardOnExit = false;
 
     // Remember the initial values to check whether anything needs saving
@@ -244,18 +245,7 @@ public class TagItemEditFragment extends DialogFragment implements PasswdHelper.
         }
         TagItem result = new TagItem(mEditItemId, mEditTagName.getText().toString(),
                 mEditTagDescription.getText().toString());
-        ContentValues values = new ContentValues();
-        values.put(DbContract.Tag.COLUMN_NAME, result.name);
-        values.put(DbContract.Tag.COLUMN_DESCRIPTION, result.description);
-        if (mAddItem) {
-            values.put(DbContract.Tag._ID, TagItem.generateId());
-            result.id = db.insert(DbContract.Tag.TABLE, "null", values);
-        } else {
-            result.id = mEditItemId;
-            String selection = DbContract.Log._ID + " = ?";
-            String[] selectionArgs = {String.valueOf(mEditItemId)};
-            db.update(DbContract.Tag.TABLE, values, selection, selectionArgs);
-        }
+        DbHelper.saveTagItem(db, result, mAddItem);
         db.close();
         dismiss();
         if (mAddItem) {
@@ -299,9 +289,7 @@ public class TagItemEditFragment extends DialogFragment implements PasswdHelper.
     }
 
     private void deleteItem(SQLiteDatabase db) {
-        String selection = DbContract.Tag._ID + " = ?";
-        String[] selectionArgs = {String.valueOf(mEditItemId)};
-        db.delete(DbContract.Tag.TABLE, selection, selectionArgs);
+        DbHelper.deleteTagItem(db, new TagItem(mEditItemId));
         db.close();
         dismiss();
         // Notify about deleted tag

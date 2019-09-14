@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2017 SpiritCroc
+ * Copyright (C) 2017-2018 SpiritCroc
  * Email: spiritcroc@gmail.com
  *
  * This program is free software: you can redistribute it and/or modify
@@ -24,17 +24,35 @@ import android.app.Dialog;
 import android.app.DialogFragment;
 import android.content.DialogInterface;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.EditText;
 
+import net.sqlcipher.database.SQLiteDatabase;
+
+import java.util.ArrayList;
+
 import de.spiritcroc.ownlog.PasswdHelper;
 import de.spiritcroc.ownlog.R;
 
-public class RequestPasswordDialog extends DialogFragment {
+public class RequestPasswordDialog extends DialogFragment
+        implements PasswdHelper.RequestDbListener {
 
-    private PasswdHelper.RequestDbListener mListener;
-    private int mRequestId;
+    private static final String TAG = RequestPasswordDialog.class.getSimpleName();
+
+    private static final int DB_BATCH_REQUEST = 0;
+
+    private ArrayList<Request> requests = new ArrayList<>();
+
+    private class Request {
+        PasswdHelper.RequestDbListener listener;
+        int requestId;
+        Request(PasswdHelper.RequestDbListener listener, int requestId) {
+            this.listener = listener;
+            this.requestId = requestId;
+        }
+    }
 
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
@@ -65,8 +83,9 @@ public class RequestPasswordDialog extends DialogFragment {
                         .setOnClickListener(new View.OnClickListener() {
                             @Override
                             public void onClick(View view) {
-                                if (PasswdHelper.getWritableDatabase(getActivity(), mListener,
-                                        mRequestId, editPassword.getText().toString(), false)) {
+                                if (PasswdHelper.getWritableDatabase(getActivity(),
+                                        RequestPasswordDialog.this, DB_BATCH_REQUEST,
+                                        editPassword.getText().toString(), false)) {
                                     dismiss();
                                 } else {
                                     editPassword.setError(getString(R.string.edit_wrong_password));
@@ -83,9 +102,18 @@ public class RequestPasswordDialog extends DialogFragment {
         return alertDialog;
     }
 
-    public RequestPasswordDialog init(PasswdHelper.RequestDbListener listener, int requestId) {
-        mListener = listener;
-        mRequestId = requestId;
-        return this;
+    public void addRequest(PasswdHelper.RequestDbListener listener, int requestId) {
+        requests.add(new Request(listener, requestId));
+    }
+
+    @Override
+    public void receiveWritableDatabase(SQLiteDatabase db, int requestId) {
+        if (requestId == DB_BATCH_REQUEST) {
+            for (Request r: requests) {
+                r.listener.receiveWritableDatabase(db, r.requestId);
+            }
+        } else {
+            Log.e(TAG, "receiveWritableDatabase: unknown requestId " + requestId);
+        }
     }
 }

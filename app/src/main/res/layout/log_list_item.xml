@@ -70,10 +70,21 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:maxLines="1" />
+            <Space
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"/>
+            <ImageView
+                android:id="@+id/attachment"
+                android:theme="@style/LogListIcon.Attachment"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@drawable/ic_attachment_list"
+                android:contentDescription="@string/has_attachments"/>
             <TextView
                 android:id="@+id/tag"
                 android:theme="@style/LogListText.Tag"
-                android:layout_width="match_parent"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="end|bottom"
                 android:gravity="end"

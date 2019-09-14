@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2017 SpiritCroc
+ * Copyright (C) 2017-2018 SpiritCroc
  * Email: spiritcroc@gmail.com
  *
  * This program is free software: you can redistribute it and/or modify
@@ -47,6 +47,7 @@ import android.widget.ArrayAdapter;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import net.sqlcipher.database.SQLiteDatabase;
 
@@ -57,12 +58,13 @@ import de.spiritcroc.ownlog.DateFormatter;
 import de.spiritcroc.ownlog.PasswdHelper;
 import de.spiritcroc.ownlog.R;
 import de.spiritcroc.ownlog.Settings;
-import de.spiritcroc.ownlog.data.DbContract;
+import de.spiritcroc.ownlog.TagFormatter;
+import de.spiritcroc.ownlog.Util;
+import de.spiritcroc.ownlog.data.DbHelper;
 import de.spiritcroc.ownlog.data.LoadLogFiltersTask;
 import de.spiritcroc.ownlog.data.LoadLogItemsTask;
 import de.spiritcroc.ownlog.data.LogFilter;
 import de.spiritcroc.ownlog.data.LogItem;
-import de.spiritcroc.ownlog.data.TagItem;
 import de.spiritcroc.ownlog.ui.LogFilterProvider;
 import de.spiritcroc.ownlog.ui.LogFilterSelector;
 
@@ -71,7 +73,10 @@ public class LogFragment extends BaseFragment implements PasswdHelper.RequestDbL
 
     private static final String TAG = LogFragment.class.getSimpleName();
 
+    private static final String KEY_LIST_POSITION = LogFragment.class.getName() + ".listPosition";
     private static final String KEY_FILTER_ID = LogFragment.class.getName() + ".filterId";
+    private static final String KEY_LAYOUT_CONTINUOUS = LogFragment.class.getName() +
+            ".layoutContinuous";
 
     private static final boolean DEBUG = false;
 
@@ -83,6 +88,7 @@ public class LogFragment extends BaseFragment implements PasswdHelper.RequestDbL
     // Next filter id: default -2: should never be a valid filter id, so default gets selected
     private long mNextFilterId = -2;
     private LogFilterSelector mLogFilterSelector;
+    boolean mLayoutContinuous = false;
 
     private LogArrayAdapter mAdapter;
 
@@ -91,6 +97,7 @@ public class LogFragment extends BaseFragment implements PasswdHelper.RequestDbL
     private ArrayList<Integer> mSelectedItems = new ArrayList<>();
 
     private boolean mRememberListPosition = true;
+    private int mRestoreListPosition = -1;
 
     private LogItem mScrollAimEntry = null;
     private int mAimEntryPosition = -1;
@@ -181,7 +188,10 @@ public class LogFragment extends BaseFragment implements PasswdHelper.RequestDbL
         super.onCreate(savedInstanceState);
 
         if (savedInstanceState != null) {
+            mRestoreListPosition = savedInstanceState.getInt(KEY_LIST_POSITION, -1);
             mNextFilterId = savedInstanceState.getLong(KEY_FILTER_ID, mNextFilterId);
+            mLayoutContinuous = savedInstanceState.getBoolean(KEY_LAYOUT_CONTINUOUS,
+                    mLayoutContinuous);
         }
 
         setHasOptionsMenu(true);
@@ -208,24 +218,33 @@ public class LogFragment extends BaseFragment implements PasswdHelper.RequestDbL
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         super.onCreateOptionsMenu(menu, inflater);
         inflater.inflate(R.menu.fragment_log, menu);
-        mSearchView = (SearchView) menu.findItem(R.id.action_search).getActionView();
-        mSearchView.setOnQueryTextListener(mSearchTextQueryListener);
-        mSearchView.setOnQueryTextFocusChangeListener(new View.OnFocusChangeListener() {
-            @Override
-            public void onFocusChange(View v, boolean hasFocus) {
-                if (!hasFocus && (mLogSearch == null || mLogSearch.equals(""))) {
-                    closeSearchView();
-                }
-            }
-        });
+        MenuItem searchItem = menu.findItem(R.id.action_search);
+        searchItem.setOnActionExpandListener(mSearchActionExpandListener);
+        mSearchView = (SearchView) searchItem.getActionView();
+        mSearchView.setOnQueryTextListener(mSearchQueryTextListener);
+        mSearchView.setOnQueryTextFocusChangeListener(mSearchQueryTextFocusChangeListener);
+    }
+
+    @Override
+    public void onPrepareOptionsMenu(Menu menu) {
+        super.onPrepareOptionsMenu(menu);
+        menu.findItem(R.id.action_layout_continuous).setChecked(mLayoutContinuous);
     }
 
     @Override
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
+        View v = getView();
+        if (v != null) {
+            ListView listView = (ListView) v.findViewById(R.id.list_view);
+            if (listView != null) {
+                outState.putInt(KEY_LIST_POSITION, listView.getFirstVisiblePosition());
+            }
+        }
         if (mLogFilters != null) {
             outState.putLong(KEY_FILTER_ID, mLogFilters.get(mCurrentFilter).id);
         }
+        outState.putBoolean(KEY_LAYOUT_CONTINUOUS, mLayoutContinuous);
     }
 
     @Override
@@ -242,6 +261,15 @@ public class LogFragment extends BaseFragment implements PasswdHelper.RequestDbL
         switch (item.getItemId()) {
             case R.id.action_add:
                 LogItemEditFragment.show(getActivity(), null);
+                return true;
+            case R.id.action_layout_continuous:
+                mLayoutContinuous = !mLayoutContinuous;
+                item.setChecked(mLayoutContinuous);
+                loadContent(false);
+                return true;
+            case R.id.action_exit:
+                Util.onExit(getActivity());
+                getActivity().finish();
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
@@ -270,7 +298,6 @@ public class LogFragment extends BaseFragment implements PasswdHelper.RequestDbL
     @Override
     public void selectFilter(int position) {
         mCurrentFilter = position;
-        closeSearchView();
         loadContent(false);
     }
 
@@ -336,22 +363,32 @@ public class LogFragment extends BaseFragment implements PasswdHelper.RequestDbL
                 Log.w(TAG, "Content loaded, but activity is null");
                 return;
             }
-            mAdapter = new LogArrayAdapter(getActivity(), R.layout.log_list_item,
-                    result.toArray(new LogItem[result.size()]));
+            if (mLayoutContinuous) {
+                mAdapter = new ContinuousLogArrayAdapter(getActivity(), R.layout.log_list_item,
+                        result.toArray(new LogItem[result.size()]));
+            } else {
+                mAdapter = new LogArrayAdapter(getActivity(), R.layout.log_list_item,
+                        result.toArray(new LogItem[result.size()]));
+            }
             if (getView() == null) {
                 Log.w(TAG, "Content loaded, but view is null");
                 return;
             }
             final ListView listView = (ListView) getView().findViewById(R.id.list_view);
-            if (mRememberListPosition) {
+            if (mRememberListPosition || mRestoreListPosition > 0) {
                 final View view = listView.getChildAt(0);
                 int top = (view == null ? 0 : view.getTop());
                 int index = listView.getFirstVisiblePosition();
-                int firstVisiblePos = listView.getFirstVisiblePosition();
-                int lastVisiblePos = listView.getLastVisiblePosition();
                 listView.setAdapter(mAdapter);
-                listView.setSelectionFromTop(index, top);
+                if (mRestoreListPosition > 0) {
+                    listView.setSelectionFromTop(mRestoreListPosition, top);
+                    mRestoreListPosition = -1;
+                } else {
+                    listView.setSelectionFromTop(index, top);
+                }
                 if (mScrollAimEntry != null) {
+                    int firstVisiblePos = listView.getFirstVisiblePosition();
+                    int lastVisiblePos = listView.getLastVisiblePosition();
                     mAimEntryPosition = result.indexOf(mScrollAimEntry);
                     // If item is not on the screen: scroll there
                     if (mAimEntryPosition >= 0 && mAimEntryPosition < result.size()
@@ -386,6 +423,11 @@ public class LogFragment extends BaseFragment implements PasswdHelper.RequestDbL
         protected String getSortOrder() {
             return mLogFilters.get(mCurrentFilter).getSortOrder();
         }
+
+        @Override
+        protected boolean shouldCheckAttachments() {
+            return true;
+        }
     }
 
     private class LogArrayAdapter extends ArrayAdapter<LogItem> {
@@ -404,13 +446,17 @@ public class LogFragment extends BaseFragment implements PasswdHelper.RequestDbL
             loadResources();
         }
 
+        protected View getInflatedView(ViewGroup parent) {
+            LayoutInflater inflater = (LayoutInflater) getActivity()
+                    .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+            return inflater.inflate(R.layout.log_list_item, parent, false);
+        }
+
         @Override
         public @NonNull View getView(int position, View convertView, @NonNull ViewGroup parent) {
             LogItemHolder holder;
             if (convertView == null) {
-                LayoutInflater inflater = (LayoutInflater) getActivity()
-                        .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-                convertView = inflater.inflate(R.layout.log_list_item, parent, false);
+                convertView = getInflatedView(parent);
 
                 holder = new LogItemHolder();
                 holder.headerLayout = (LinearLayout) convertView.findViewById(R.id.header_layout);
@@ -419,7 +465,9 @@ public class LogFragment extends BaseFragment implements PasswdHelper.RequestDbL
                 holder.date2 = (TextView) convertView.findViewById(R.id.date_2);
                 holder.date3 = (TextView) convertView.findViewById(R.id.date_3);
                 holder.title = (TextView) convertView.findViewById(R.id.title);
+                holder.content = (TextView) convertView.findViewById(R.id.content);
                 holder.tag = (TextView) convertView.findViewById(R.id.tag);
+                holder.attachment = convertView.findViewById(R.id.attachment);
 
                 convertView.setTag(holder);
             } else {
@@ -437,8 +485,14 @@ public class LogFragment extends BaseFragment implements PasswdHelper.RequestDbL
             String date2text = DateFormatter.getOverviewPart2(getContext(), item.time);
             holder.date2.setText(TextUtils.isEmpty(date2text) ? date2text : (date2text + " "));
             holder.date3.setText(DateFormatter.getOverviewPart3(getContext(), item.time));
-            holder.title.setText(TextUtils.isEmpty(item.title) ? item.content : item.title);
-            holder.tag.setText(formatTags(item.tags));
+            if (holder.content == null) {
+                holder.title.setText(TextUtils.isEmpty(item.title) ? item.content : item.title);
+            } else {
+                holder.title.setText(item.title);
+                holder.content.setText(item.content);
+            }
+            holder.tag.setText(TagFormatter.formatTags(getResources(), item.tags));
+            holder.attachment.setVisibility(item.hasAttachments ? View.VISIBLE : View.GONE);
 
             convertView.setBackgroundColor(mSelectedItems.contains(position)
                     ? mItemSelectedBgColor
@@ -467,6 +521,18 @@ public class LogFragment extends BaseFragment implements PasswdHelper.RequestDbL
 
     }
 
+    private class ContinuousLogArrayAdapter extends LogArrayAdapter {
+        public ContinuousLogArrayAdapter(Context context, int resource, LogItem[] objects) {
+            super(context, resource, objects);
+        }
+        @Override
+        protected View getInflatedView(ViewGroup parent) {
+            LayoutInflater inflater = (LayoutInflater) getActivity()
+                    .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+            return inflater.inflate(R.layout.log_list_item_continuous, parent, false);
+        }
+    }
+
     private static class LogItemHolder {
         LinearLayout headerLayout;
         LinearLayout contentLayout;
@@ -474,18 +540,9 @@ public class LogFragment extends BaseFragment implements PasswdHelper.RequestDbL
         TextView date2;
         TextView date3;
         TextView title;
+        TextView content;
         TextView tag;
-    }
-
-    private String formatTags(ArrayList<TagItem> tags) {
-        if (tags == null || tags.isEmpty()) {
-            return "";
-        }
-        String result = tags.get(0).name;
-        for (int i = 1; i < tags.size(); i++) {
-            result += getString(R.string.log_list_tag_list_separator) + tags.get(1).name;
-        }
-        return result;
+        View attachment;
     }
 
 
@@ -585,14 +642,11 @@ public class LogFragment extends BaseFragment implements PasswdHelper.RequestDbL
             Log.e(TAG, "deleteSelection: selection is empty");
             return;
         }
-        String selection = DbContract.Log._ID + " = ?";
-        String[] selectionArgs = new String[mSelectedItems.size()];
-        selectionArgs[0] = String.valueOf(mItems.get(mSelectedItems.get(0)).id);
-        for (int i = 1; i < mSelectedItems.size(); i++) {
-            selection += " OR " + DbContract.Log._ID + " = ?";
-            selectionArgs[i] = String.valueOf(mItems.get(mSelectedItems.get(i)).id);
+        LogItem[] itemsToRemove = new LogItem[mSelectedItems.size()];
+        for (int i = 0; i < itemsToRemove.length; i++) {
+            itemsToRemove[i] = mItems.get(mSelectedItems.get(i));
         }
-        db.delete(DbContract.Log.TABLE, selection, selectionArgs);
+        DbHelper.removeLogItemsFromDb(getActivity(), db, itemsToRemove);
         db.close();
         // Notify about deleted items
         Intent notifyIntent = new Intent(Constants.EVENT_LOG_UPDATE);
@@ -603,13 +657,30 @@ public class LogFragment extends BaseFragment implements PasswdHelper.RequestDbL
         LocalBroadcastManager.getInstance(getActivity()).sendBroadcast(notifyIntent);
     }
 
-    private SearchView.OnQueryTextListener mSearchTextQueryListener =
+    private View.OnFocusChangeListener mSearchQueryTextFocusChangeListener =
+            new View.OnFocusChangeListener() {
+                @Override
+                public void onFocusChange(View v, boolean hasFocus) {
+                    if (!hasFocus && (mLogSearch == null || mLogSearch.equals(""))) {
+                        closeSearchView();
+                    }
+                }
+            };
+
+    private SearchView.OnQueryTextListener mSearchQueryTextListener =
             new SearchView.OnQueryTextListener() {
                 @Override
                 public boolean onQueryTextSubmit(String s) {
                     // Clear focus so searchView does not steal next back button press
                     mSearchView.clearFocus();
-                    // No need to reload content; already done in onQueryTextChange
+                    if (mCurrentFilter != 0) {
+                        // Search all: default filter
+                        mLogFilterSelector.overwriteFilterSelection(0);
+                        Toast.makeText(getActivity(), R.string.search_switched_to_show_all_toast,
+                                Toast.LENGTH_SHORT).show();
+                        // Reload will be done in selection change callback
+                    }
+                    // else: No need to reload content; already done in onQueryTextChange
                     return false;
                 }
 
@@ -618,6 +689,23 @@ public class LogFragment extends BaseFragment implements PasswdHelper.RequestDbL
                     mLogSearch = s;
                     loadContent(false);
                     return false;
+                }
+            };
+
+    private MenuItem.OnActionExpandListener mSearchActionExpandListener =
+            new MenuItem.OnActionExpandListener() {
+                @Override
+                public boolean onMenuItemActionExpand(MenuItem item) {
+                    // Fix duplicate entries showing
+                    item.setVisible(false);
+                    return true;
+                }
+
+                @Override
+                public boolean onMenuItemActionCollapse(MenuItem item) {
+                    // Fix missing entries
+                    getActivity().invalidateOptionsMenu();
+                    return true;
                 }
             };
 

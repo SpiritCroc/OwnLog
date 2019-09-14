@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-    Copyright (C) 2017 SpiritCroc
+    Copyright (C) 2017-2018 SpiritCroc
     Email: spiritcroc@gmail.com
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -26,6 +26,7 @@
     <dimen name="list_item_vertical_padding">16dp</dimen>
     <dimen name="list_header_horizontal_padding">@dimen/list_item_horizontal_padding</dimen>
     <dimen name="list_header_vertical_padding">8dp</dimen>
+    <dimen name="list_content_top_padding">8dp</dimen>
 
     <dimen name="list_smooth_scroll_offset">16dp</dimen>
 
@@ -42,6 +43,16 @@
 
     <dimen name="dialog_horizontal_padding">8dp</dimen>
     <dimen name="dialog_top_padding">4dp</dimen>
+
+    <dimen name="attachments_action_bar_vertical_padding">16dp</dimen>
+
+    <dimen name="attachments_peek_height">50sp</dimen>
+    <dimen name="attachments_peek_space_height">@dimen/attachments_peek_height</dimen>
+    <dimen name="attachments_title_height">@dimen/attachments_peek_height</dimen>
+    <dimen name="attachments_title_text_size">20sp</dimen>
+    <dimen name="attachments_title_padding">4dp</dimen>
+    <dimen name="attachment_margin">@dimen/activity_horizontal_margin</dimen>
+    <dimen name="attachment_padding">8dp</dimen>
 
 
     <!-- SimpleDateFormatPreference -->

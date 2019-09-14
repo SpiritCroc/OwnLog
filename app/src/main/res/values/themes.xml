@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-    Copyright (C) 2017 SpiritCroc
+    Copyright (C) 2017-2018 SpiritCroc
     Email: spiritcroc@gmail.com
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -27,10 +27,17 @@
         <item name="textColorListDate3">#8a000000</item>
         <item name="textColorListTitle">#de000000</item>
         <item name="textColorListTag">#60000000</item>
+        <item name="textColorListContent">?android:attr/textColorSecondary</item>
+        <item name="textColorStatus">#60000000</item>
+        <item name="foregroundColorListAttachment">#60000000</item>
         <item name="backgroundColorListHeader">?android:attr/colorBackground</item>
         <item name="backgroundColorListItem">@android:color/transparent</item>
         <item name="backgroundColorListItemSelected">#1e000000</item>
         <item name="backgroundColorEditTagView">#1e000000</item>
+        <item name="backgroundColorPeekTitle">#eeeeee</item>
+        <item name="backgroundColorPeekContent">?android:attr/colorBackground</item>
+        <item name="backgroundColorPeekCard">?attr/colorBackgroundFloating</item>
+        <item name="backgroundColorPeekActionBar">?attr/colorBackgroundFloating</item>
 
         <!-- modify material drawer colors -->
         <item name="material_drawer_background">?android:attr/colorBackground</item>
@@ -49,10 +56,17 @@
         <item name="textColorListDate3">#b3ffffff</item>
         <item name="textColorListTitle">#ffffffff</item>
         <item name="textColorListTag">#80ffffff</item>
+        <item name="textColorListContent">?android:attr/textColorSecondary</item>
+        <item name="textColorStatus">#80ffffff</item>
+        <item name="foregroundColorListAttachment">#80ffffff</item>
         <item name="backgroundColorListHeader">?android:attr/colorBackground</item>
         <item name="backgroundColorListItem">@android:color/transparent</item>
         <item name="backgroundColorListItemSelected">#33ffffff</item>
         <item name="backgroundColorEditTagView">#33ffffff</item>
+        <item name="backgroundColorPeekTitle">#ff424242</item>
+        <item name="backgroundColorPeekContent">#ff212121</item>
+        <item name="backgroundColorPeekCard">?android:attr/colorBackground</item>
+        <item name="backgroundColorPeekActionBar">?android:attr/colorBackground</item>
 
         <!-- modify material drawer colors -->
         <item name="material_drawer_background">?android:attr/colorBackground</item>

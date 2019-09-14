@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-    Copyright (C) 2017 SpiritCroc
+    Copyright (C) 2017-2018 SpiritCroc
     Email: spiritcroc@gmail.com
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -37,9 +37,24 @@
         <item name="android:textColor">?attr/textColorListTitle</item>
     </style>
 
+    <style name="LogListText.Content" parent="">
+        <item name="android:textSize">@dimen/text_size_small</item>
+        <item name="android:textColor">?attr/textColorListContent</item>
+    </style>
+
     <style name="LogListText.Tag" parent="">
         <item name="android:textSize">@dimen/text_size_small</item>
         <item name="android:textColor">?attr/textColorListTag</item>
+    </style>
+
+    <style name="LogListText.Status" parent="">
+        <item name="android:textSize">@dimen/text_size_small</item>
+        <item name="android:textColor">?attr/textColorStatus</item>
+    </style>
+
+    <style name="LogListIcon.Attachment" parent="">
+        <item name="android:paddingLeft">4dp</item>
+        <item name="android:paddingRight">4dp</item>
     </style>
 
     <!-- Edit log item -->
@@ -49,6 +64,11 @@
     </style>
 
     <style name="AddTagButton" parent="Base.Widget.AppCompat.Button.Borderless">
+        <item name="android:minWidth">18dp</item>
+        <item name="android:minHeight">18dp</item>
+    </style>
+
+    <style name="AddAttachmentButton">
         <item name="android:minWidth">18dp</item>
         <item name="android:minHeight">18dp</item>
     </style>
@@ -75,6 +95,26 @@
     </style>
 
     <style name="EditLogTags.EditTagButton" parent="Base.Widget.AppCompat.Button.Borderless">
+        <item name="android:minWidth">18dp</item>
+        <item name="android:minHeight">18dp</item>
+    </style>
+
+    <!-- Attachments -->
+    <style name="AttachmentsTitle">
+        <item name="android:background">?attr/backgroundColorPeekTitle</item>
+        <item name="android:elevation">2dp</item>
+    </style>
+
+    <style name="AttachmentsContent">
+        <item name="android:background">?attr/backgroundColorPeekContent</item>
+    </style>
+
+    <style name="AttachmentsActionBar">
+        <item name="android:background">@drawable/background_attachments_action_bar</item>
+        <item name="android:elevation">2dp</item>
+    </style>
+
+    <style name="AttachmentsButton" parent="Base.Widget.AppCompat.Button.Borderless">
         <item name="android:minWidth">18dp</item>
         <item name="android:minHeight">18dp</item>
     </style>

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2017 SpiritCroc
+ * Copyright (C) 2017-2018 SpiritCroc
  * Email: spiritcroc@gmail.com
  *
  * This program is free software: you can redistribute it and/or modify
@@ -40,6 +40,8 @@ import de.spiritcroc.ownlog.data.LogFilter;
 import de.spiritcroc.ownlog.ui.LogFilterProvider;
 import de.spiritcroc.ownlog.ui.LogFilterSelector;
 import de.spiritcroc.ownlog.ui.fragment.BaseFragment;
+import de.spiritcroc.ownlog.ui.fragment.ExportDialog;
+import de.spiritcroc.ownlog.ui.fragment.ImportLogFragment;
 import de.spiritcroc.ownlog.ui.fragment.LogFilterEditFragment;
 import de.spiritcroc.ownlog.ui.settings.AboutActivity;
 import de.spiritcroc.ownlog.ui.settings.SettingsActivity;
@@ -49,6 +51,8 @@ public class DrawerSingleFragmentActivity extends SingleFragmentActivity
 
     private static final String TAG = DrawerSingleFragmentActivity.class.getSimpleName();
 
+    private static final int RESULT_CODE_IMPORT = 1;
+
     private Drawer mDrawer;
 
     private LogFilterProvider mFilterProvider;
@@ -57,6 +61,8 @@ public class DrawerSingleFragmentActivity extends SingleFragmentActivity
     private static final int DRAWER_ID_ABOUT = -101;
     private static final int DRAWER_ID_THEME = -102;
     private static final int DRAWER_ID_FILTER_ADD = -201;
+    private static final int DRAWER_ID_EXPORT = -301;
+    private static final int DRAWER_ID_IMPORT = -302;
     private int mFilterCount = 0;
 
     @Override
@@ -108,6 +114,11 @@ public class DrawerSingleFragmentActivity extends SingleFragmentActivity
     }
 
     @Override
+    public void overwriteFilterSelection(int position) {
+        mDrawer.setSelection(position, true);
+    }
+
+    @Override
     protected void setupFragment(BaseFragment fragment) {
         if (fragment instanceof LogFilterProvider) {
             setFilterProvider((LogFilterProvider) fragment);
@@ -119,7 +130,6 @@ public class DrawerSingleFragmentActivity extends SingleFragmentActivity
     private void setupDrawer() {
         mDrawer.removeAllItems();
         mFilterCount = 0;
-        boolean needsMoreDivider = false;
         if (mFilterProvider != null) {
             ArrayList<LogFilter> filters = mFilterProvider.getAvailableLogFilters();
             if (filters != null) {
@@ -144,9 +154,21 @@ public class DrawerSingleFragmentActivity extends SingleFragmentActivity
                         .withSelectable(false)
                         .withIcon(R.drawable.ic_drawer_add)
                         .withName(R.string.drawer_add_filter));
-                needsMoreDivider = true;
             }
         }
+        mDrawer.addItem(new SectionDrawerItem()
+                .withName(R.string.drawer_data_management));
+        mDrawer.addItem(new SecondaryDrawerItem()
+                .withIdentifier(DRAWER_ID_EXPORT)
+                .withSelectable(false)
+                .withIcon(R.drawable.ic_drawer_export)
+                .withName(R.string.drawer_export));
+        mDrawer.addItem(new SecondaryDrawerItem()
+                .withIdentifier(DRAWER_ID_IMPORT)
+                .withSelectable(false)
+                .withIcon(R.drawable.ic_drawer_import)
+                .withName(R.string.drawer_import));
+
         if (isEastereggEnabled()) {
             mDrawer.addItem(new SectionDrawerItem()
                     .withName(R.string.easteregg));
@@ -155,12 +177,10 @@ public class DrawerSingleFragmentActivity extends SingleFragmentActivity
                     .withSelectable(false)
                     .withIcon(R.drawable.ic_drawer_theme)
                     .withName(R.string.pref_theme_title));
-            needsMoreDivider = true;
         }
-        if (needsMoreDivider) {
-            mDrawer.addItem(new SectionDrawerItem()
-                    .withName(R.string.drawer_more));
-        }
+
+        mDrawer.addItem(new SectionDrawerItem()
+                .withName(R.string.drawer_more));
         mDrawer.addItem(new SecondaryDrawerItem()
                 .withIdentifier(DRAWER_ID_SETTINGS)
                 .withSelectable(false)
@@ -208,6 +228,12 @@ public class DrawerSingleFragmentActivity extends SingleFragmentActivity
                                         .show(getFragmentManager(), "LogFilterEditFragment");
                                 result = true;
                                 break;
+                            case DRAWER_ID_EXPORT:
+                                new ExportDialog().show(getFragmentManager(), "ExportDialog");
+                                break;
+                            case DRAWER_ID_IMPORT:
+                                openImportChooser();
+                                break;
                             case DRAWER_ID_THEME:
                                 switchTheme();
                                 result = true;
@@ -254,6 +280,26 @@ public class DrawerSingleFragmentActivity extends SingleFragmentActivity
             mDrawer.closeDrawer();
         } else {
             super.onBackPressed();
+        }
+    }
+
+    private void openImportChooser() {
+        // TODO what if none installed?
+        Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
+        intent.setType("*/*");
+        startActivityForResult(intent, RESULT_CODE_IMPORT);
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (resultCode == RESULT_OK) {
+            switch (requestCode) {
+                case RESULT_CODE_IMPORT:
+                    if (data != null) {
+                        ImportLogFragment.show(this, data.getData());
+                    }
+                    break;
+            }
         }
     }
 

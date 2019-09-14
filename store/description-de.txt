@@ -16,6 +16,7 @@ Log-Einträge bestehen aus:
 - Titel
 - Inhalt
 - Stichworte
+- Anhänge (jegliches Dateiformat)
 
 Es kann nach Stichworten gefiltert werden, und auch nach Titel und Inhalt der Einträge gesucht werden.
 

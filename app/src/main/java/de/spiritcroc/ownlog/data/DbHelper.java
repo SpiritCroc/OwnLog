@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2017 SpiritCroc
+ * Copyright (C) 2017-2018 SpiritCroc
  * Email: spiritcroc@gmail.com
  *
  * This program is free software: you can redistribute it and/or modify
@@ -19,17 +19,17 @@
 package de.spiritcroc.ownlog.data;
 
 
+import android.content.ContentValues;
 import android.content.Context;
+import android.support.annotation.Nullable;
 import android.util.Log;
 
 import net.sqlcipher.database.SQLiteDatabase;
 import net.sqlcipher.database.SQLiteOpenHelper;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
+import java.util.List;
+
+import de.spiritcroc.ownlog.FileHelper;
 
 public class DbHelper extends SQLiteOpenHelper {
 
@@ -37,14 +37,16 @@ public class DbHelper extends SQLiteOpenHelper {
 
     private static boolean INITIALIZED = false;
 
-    public static final int VERSION = 4;
+    public static final int VERSION = 6;
     public static final String NAME = "log.db";
     public static final String NAME_COPY = "log2.db";
+    @Deprecated
     private static final String NAME_BACKUP = "log_backup.db";
 
     private static final String TEXT = " TEXT";
     private static final String INTEGER = " INTEGER";
     private static final String BOOLEAN = " BOOLEAN";
+    private static final String BLOB = " BLOB";
 
     private static final String CREATE_TABLE = "CREATE TABLE ";
     private static final String DROP_TABLE = "DROP TABLE IF EXISTS ";
@@ -58,6 +60,7 @@ public class DbHelper extends SQLiteOpenHelper {
     private static final String ON_CONFLICT = " ON CONFLICT";
     private static final String CASCADE = " CASCADE";
     private static final String IGNORE = " IGNORE";
+    private static final String FAIL = " FAIL";
 
     private static final String COMMA_SEP = ",";
 
@@ -68,10 +71,39 @@ public class DbHelper extends SQLiteOpenHelper {
             DbContract.Log.COLUMN_TITLE + TEXT + COMMA_SEP +
             DbContract.Log.COLUMN_CONTENT + TEXT + " )";
 
-    private static final String SQL_CREATE_TAG = CREATE_TABLE + DbContract.Tag.TABLE + " (" +
-            DbContract.Tag._ID + INTEGER + PRIMARY_KEY + COMMA_SEP +
-            DbContract.Tag.COLUMN_NAME + TEXT + COMMA_SEP +
-            DbContract.Tag.COLUMN_DESCRIPTION + TEXT + " )";
+    /*
+    @Deprecated
+    private static final String SQL_CREATE_LOG_ATTACHMENT =
+            CREATE_TABLE + DbContract.LogAttachment.TABLE + "(" +
+                    DbContract.LogAttachment._ID + INTEGER + PRIMARY_KEY + COMMA_SEP +
+                    DbContract.LogAttachment.COLUMN_LOG + INTEGER + NOT_NULL + REFERENCES +
+                            DbContract.Log.TABLE + "(" + DbContract.Log._ID + ")" +
+                                    ON_DELETE + CASCADE + COMMA_SEP +
+                    DbContract.LogAttachment.COLUMN_ATTACHMENT_NAME + TEXT + COMMA_SEP +
+                    DbContract.LogAttachment.COLUMN_ATTACHMENT_TYPE + TEXT + COMMA_SEP +
+                    DbContract.LogAttachment.COLUMN_ATTACHMENT_DATA + BLOB + COMMA_SEP +
+                    UNIQUE + " (" + DbContract.LogAttachment.COLUMN_LOG + COMMA_SEP +
+                            DbContract.LogAttachment.COLUMN_ATTACHMENT_NAME + ")" +
+                                    ON_CONFLICT + FAIL + ")";
+    */
+
+    private static final String SQL_CREATE_LOG_ATTACHMENT2 =
+            CREATE_TABLE + DbContract.LogAttachment2.TABLE + "(" +
+                    DbContract.LogAttachment2._ID + INTEGER + PRIMARY_KEY + COMMA_SEP +
+                    DbContract.LogAttachment2.COLUMN_LOG + INTEGER + NOT_NULL + REFERENCES +
+                            DbContract.Log.TABLE + "(" + DbContract.Log._ID + ")" +
+                                    ON_DELETE + CASCADE + COMMA_SEP +
+                    DbContract.LogAttachment2.COLUMN_ATTACHMENT_NAME + TEXT + COMMA_SEP +
+                    DbContract.LogAttachment2.COLUMN_ATTACHMENT_TYPE + TEXT + COMMA_SEP +
+                    UNIQUE + " (" + DbContract.LogAttachment2.COLUMN_LOG + COMMA_SEP +
+                            DbContract.LogAttachment2.COLUMN_ATTACHMENT_NAME + ")" +
+                                    ON_CONFLICT + FAIL + ")";
+
+    private static final String SQL_CREATE_TAG =
+            CREATE_TABLE + DbContract.Tag.TABLE + " (" +
+                    DbContract.Tag._ID + INTEGER + PRIMARY_KEY + COMMA_SEP +
+                    DbContract.Tag.COLUMN_NAME + TEXT + COMMA_SEP +
+                    DbContract.Tag.COLUMN_DESCRIPTION + TEXT + " )";
 
     private static final String SQL_CREATE_LOG_TAGS =
             CREATE_TABLE + DbContract.LogTags.TABLE + " (" +
@@ -124,6 +156,7 @@ public class DbHelper extends SQLiteOpenHelper {
     @Override
     public void onCreate(SQLiteDatabase db) {
         db.execSQL(SQL_CREATE_LOG);
+        db.execSQL(SQL_CREATE_LOG_ATTACHMENT2);
         db.execSQL(SQL_CREATE_TAG);
         db.execSQL(SQL_CREATE_LOG_TAGS);
         db.execSQL(SQL_CREATE_LOG_FILTER);
@@ -132,7 +165,12 @@ public class DbHelper extends SQLiteOpenHelper {
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-        switch (oldVersion) {
+        upgradeDb(db, oldVersion, newVersion);
+   }
+
+    static void upgradeDb(SQLiteDatabase db, int oldVersion, int newVersion)
+            throws UnsupportedUpgradeException {
+         switch (oldVersion) {
             case 1:
                 // Add description to tags
                 db.execSQL("alter table " + DbContract.Tag.TABLE + " add " +
@@ -145,13 +183,23 @@ public class DbHelper extends SQLiteOpenHelper {
                 // LogFilter_Tags: add exclude boolean
                 db.execSQL("alter table " + DbContract.LogFilter_Tags.TABLE + " add " +
                         DbContract.LogFilter_Tags.COLUMN_EXCLUDE_TAG + BOOLEAN + NOT_NULL + DEFAULT + "FALSE");
-                break; // Remember to keep a break before default!
-            default:
-                Log.e(TAG, "unhandled upgrade from " + oldVersion + " to " +
-                        newVersion + "; discarding content");
-                createBackup(mContext);
-                recreateDb(db);
+            case 4:
+                /* Internal release
+                // Create Attachment table
+                db.execSQL(SQL_CREATE_LOG_ATTACHMENT);
+                */
+            case 5:
+                /* Internal release
+                // Move to newer attachment implementation
+                db.execSQL(DROP_TABLE + DbContract.LogAttachment.TABLE);
+                */
+                db.execSQL(SQL_CREATE_LOG_ATTACHMENT2);
+
+                // Remember to keep break before default!
                 break;
+            default:
+                Log.e(TAG, "unhandled upgrade from " + oldVersion + " to " + newVersion);
+                throw new UnsupportedUpgradeException(oldVersion, newVersion);
         }
     }
 
@@ -164,44 +212,137 @@ public class DbHelper extends SQLiteOpenHelper {
         }
     }
 
-    private void recreateDb(SQLiteDatabase db) {
-        db.execSQL(DROP_TABLE + DbContract.Log.TABLE);
-        db.execSQL(DROP_TABLE + DbContract.Tag.TABLE);
-        db.execSQL(DROP_TABLE + DbContract.LogTags.TABLE);
-        db.execSQL(DROP_TABLE + DbContract.LogFilter.TABLE);
-        db.execSQL(DROP_TABLE + DbContract.LogFilter_Tags.TABLE);
-        onCreate(db);
-    }
+    public static class UnsupportedUpgradeException extends RuntimeException {
+        public final int oldVersion;
+        public final int newVersion;
 
-    public static void createBackup(Context context) {
-        deleteBackup(context);
-
-        File dbFile = context.getDatabasePath(DbHelper.NAME);
-        File dbBackupFile = context.getDatabasePath(DbHelper.NAME_BACKUP);
-        InputStream inputStream = null;
-        FileOutputStream outputStream = null;
-
-        try {
-            inputStream = new FileInputStream(dbFile);
-            outputStream = new FileOutputStream(dbBackupFile, false);
-            byte[] buffer = new byte[1024];
-            int length;
-            while ((length = inputStream.read(buffer)) > 0) {
-                outputStream.write(buffer, 0, length);
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        } finally {
-            try {
-                if (inputStream != null) inputStream.close();
-                if (outputStream != null) outputStream.close();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+        public UnsupportedUpgradeException(int oldVersion, int newVersion) {
+            this.oldVersion = oldVersion;
+            this.newVersion = newVersion;
         }
     }
 
-    public static void deleteBackup(Context context) {
-        context.getDatabasePath(DbHelper.NAME_BACKUP).delete();
+
+    public static long saveLogItemToDb(LogItem logItem, SQLiteDatabase db, boolean add,
+                                       boolean preserveTimestamp) {
+        // Last modified timestamp
+        if (!preserveTimestamp) {
+            logItem.timeEnd = System.currentTimeMillis();
+        }
+        // Save to db
+        ContentValues values = new ContentValues();
+        values.put(DbContract.Log.COLUMN_TITLE, logItem.title);
+        values.put(DbContract.Log.COLUMN_CONTENT, logItem.content);
+        values.put(DbContract.Log.COLUMN_TIME, logItem.time);
+        values.put(DbContract.Log.COLUMN_TIME_END, logItem.timeEnd);
+        long id;
+        if (logItem.id == LogItem.ID_NONE) {
+            id = LogItem.generateId();
+        } else {
+            id = logItem.id;
+        }
+        if (add) {
+            values.put(DbContract.Log._ID, id);
+            id = db.insert(DbContract.Log.TABLE, "null", values);
+        } else {
+            String selection = DbContract.Log._ID + " = ?";
+            String[] selectionArgs = {String.valueOf(id)};
+            db.update(DbContract.Log.TABLE, values, selection, selectionArgs);
+        }
+        return id;
+    }
+
+    public static void removeLogItemsFromDb(Context context, SQLiteDatabase db,
+                                            LogItem... logItems) {
+        if (logItems.length == 0) {
+            return;
+        }
+        String selection = DbContract.Log._ID + " = ?";
+        String[] selectionArgs = new String[logItems.length];
+        selectionArgs[0] = String.valueOf(logItems[0].id);
+        for (int i = 1; i < logItems.length; i++) {
+            selection += " OR " + DbContract.Log._ID + " = ?";
+            selectionArgs[i] = String.valueOf(logItems[i].id);
+        }
+        db.delete(DbContract.Log.TABLE, selection, selectionArgs);
+        // Remove attachments storage
+        for (LogItem logItem: logItems) {
+            FileHelper.removeAllAttachments(context, logItem);
+        }
+    }
+
+    public static void saveLogTagsToDb(LogItem logItem, SQLiteDatabase db,
+                                    @Nullable List<TagItem> add,
+                                    @Nullable List<TagItem> remove) {
+        for (TagItem tag: add) {
+            ContentValues tagValues = new ContentValues();
+            tagValues.put(DbContract.LogTags.COLUMN_LOG, logItem.id);
+            tagValues.put(DbContract.LogTags.COLUMN_TAG, tag.id);
+            db.insert(DbContract.LogTags.TABLE, "null", tagValues);
+        }
+        if (!remove.isEmpty()) {
+            String selection = DbContract.LogTags.COLUMN_LOG + " = ? AND ("
+                    + DbContract.LogTags.COLUMN_TAG + " = ?";
+            String[] selectionArgs = new String[remove.size()+1];
+            selectionArgs[0] = String.valueOf(logItem.id);
+            selectionArgs[1] = String.valueOf(remove.get(0).id);
+            for (int i = 1; i < remove.size(); i++) {
+                selection += " OR " + DbContract.LogTags.COLUMN_TAG + " = ?";
+                selectionArgs[i+1] = String.valueOf(remove.get(i).id);
+            }
+            selection += ")";
+            db.delete(DbContract.LogTags.TABLE, selection, selectionArgs);
+        }
+    }
+
+    public static void addLogAttachmentDbEntry(SQLiteDatabase db, LogItem.Attachment attachment) {
+        if (attachment.id == LogItem.Attachment.ID_NONE) {
+            attachment.id = LogItem.Attachment.generateId();
+        }
+        ContentValues values = new ContentValues();
+        values.put(DbContract.LogAttachment2._ID, attachment.id);
+        values.put(DbContract.LogAttachment2.COLUMN_LOG, attachment.logId);
+        values.put(DbContract.LogAttachment2.COLUMN_ATTACHMENT_NAME, attachment.name);
+        values.put(DbContract.LogAttachment2.COLUMN_ATTACHMENT_TYPE, attachment.type);
+        db.insert(DbContract.LogAttachment2.TABLE, "null", values);
+    }
+
+    public static void renameLogAttachmentDbEntry(SQLiteDatabase db,
+                                                  LogItem.Attachment attachment) {
+        ContentValues values = new ContentValues();
+        values.put(DbContract.LogAttachment2.COLUMN_ATTACHMENT_NAME, attachment.name);
+        String selection = DbContract.LogAttachment2._ID + " = ?";
+        String[] selectionArgs = {String.valueOf(attachment.id)};
+        db.update(DbContract.LogAttachment2.TABLE, values, selection, selectionArgs);
+    }
+
+    public static void deleteLogAttachmentDbEntry(SQLiteDatabase db,
+                                                  LogItem.Attachment attachment) {
+        String selection = DbContract.LogAttachment2._ID + " = ?";
+        db.delete(DbContract.LogAttachment2.TABLE, selection,
+                new String[]{String.valueOf(attachment.id)});
+    }
+
+    public static void saveTagItem(SQLiteDatabase db, TagItem tagItem, boolean add) {
+        ContentValues values = new ContentValues();
+        values.put(DbContract.Tag.COLUMN_NAME, tagItem.name);
+        values.put(DbContract.Tag.COLUMN_DESCRIPTION, tagItem.description);
+        if (tagItem.id == TagItem.ID_NONE) {
+            tagItem.id = TagItem.generateId();
+        }
+        if (add) {
+            values.put(DbContract.Tag._ID, tagItem.id);
+            tagItem.id = db.insert(DbContract.Tag.TABLE, "null", values);
+        } else {
+            String selection = DbContract.Log._ID + " = ?";
+            String[] selectionArgs = {String.valueOf(tagItem.id)};
+            db.update(DbContract.Tag.TABLE, values, selection, selectionArgs);
+        }
+    }
+
+    public static void deleteTagItem(SQLiteDatabase db, TagItem tagItem) {
+        String selection = DbContract.Tag._ID + " = ?";
+        String[] selectionArgs = {String.valueOf(tagItem.id)};
+        db.delete(DbContract.Tag.TABLE, selection, selectionArgs);
     }
 }

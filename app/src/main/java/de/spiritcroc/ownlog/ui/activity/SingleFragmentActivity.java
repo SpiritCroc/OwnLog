@@ -19,12 +19,14 @@
 package de.spiritcroc.ownlog.ui.activity;
 
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.v7.app.ActionBar;
 import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
 
 import de.spiritcroc.ownlog.Constants;
 import de.spiritcroc.ownlog.R;
+import de.spiritcroc.ownlog.ui.PermissionRequester;
 import de.spiritcroc.ownlog.ui.fragment.BaseFragment;
 import de.spiritcroc.ownlog.ui.fragment.LogFragment;
 
@@ -79,7 +81,7 @@ public class SingleFragmentActivity extends BaseActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case android.R.id.home:
-                if (!mFragment.onUpOrBackPressed()) {
+                if (!mFragment.onUpOrBackPressed(false)) {
                     finish();
                 }
                 return true;
@@ -90,7 +92,7 @@ public class SingleFragmentActivity extends BaseActivity {
 
     @Override
     public void onBackPressed() {
-        if (!mFragment.onUpOrBackPressed()) {
+        if (!mFragment.onUpOrBackPressed(true)) {
             super.onBackPressed();
         }
     }
@@ -130,5 +132,14 @@ public class SingleFragmentActivity extends BaseActivity {
             title = getString(R.string.app_name);
         }
         return title;
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull  String[] permissions,
+                                           @NonNull  int[] grantResults) {
+        if (mFragment instanceof PermissionRequester) {
+            ((PermissionRequester) mFragment)
+                    .onRequestPermissionsResult(requestCode, permissions, grantResults);
+        }
     }
 }
